@@ -12,25 +12,24 @@ export const getAllNotes = () => api.get("/api/notes");
 export const getCategories = () => api.get("/api/categories");
 
 export const createNote = (noteData, imageFile) => {
-    const formData = new FormData();
-  
-    formData.append("note", JSON.stringify(noteData));
-  
-    if (imageFile) {
-      formData.append("image", imageFile);
-    }
-  
-    return api.post("/api/notes", formData);
-  };
-  
+  const formData = new FormData();
+
+  formData.append("note", JSON.stringify(noteData));
+
+  if (imageFile) {
+    formData.append("image", imageFile);
+  }
+
+  return api.post("/api/notes", formData);
+};
 
 export const getCollectedNotes = (userId) =>
-  api.get(`/collections?userId=${userId}`);
+  api.get(`/api/collections?userId=${userId}`);
 
 export const collectNote = (noteId, userId) =>
-  api.post(`/collections/${noteId}?userId=${userId}`);
+  api.post(`/api/collections/${noteId}?userId=${userId}`);
 
 export const getCollectionCount = (userId) =>
-  api.get(`/collections/count?userId=${userId}`);
+  api.get(`/api/collections/count?userId=${userId}`);
 
 export default api;
