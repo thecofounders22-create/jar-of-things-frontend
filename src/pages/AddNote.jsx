@@ -121,7 +121,7 @@ function AddNote() {
                             onChange={(event) => setContent(event.target.value)}
                             placeholder="Write something from your heart..."
                             rows="5"
-                            maxLength="1000"
+                            maxLength="5000"
                         />
 
                         <p className="character-count">{content.length}/1000</p>
