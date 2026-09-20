@@ -1689,3 +1689,102 @@ h1 {
   .theatre-arrow { position: absolute; bottom: -4px; }
   .note-theatre { position: relative; }
 }
+
+/* ========================================
+   TREASURED CARDS — clamped previews
+   Append to App.css. Two existing rules need replacing first:
+   delete the old `.treasured-card { ... }` and
+   `.treasured-content { ... }` blocks, since these supersede them.
+======================================== */
+
+.treasured-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 16px;
+  min-height: 300px;
+  max-height: 460px;
+  padding: 28px;
+  overflow: hidden;              /* keeps every card the same size */
+  text-align: left;
+  border: 1px solid rgba(195, 154, 95, 0.22);
+  border-radius: 10px;
+  background: linear-gradient(150deg, rgba(244, 234, 214, 0.08), rgba(244, 234, 214, 0.02));
+  box-shadow: 0 16px 50px rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(10px);
+  transition: transform 0.3s ease, border-color 0.3s ease;
+}
+
+.treasured-body {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+  min-height: 0;
+}
+
+.treasured-content {
+  margin: 0;
+  color: var(--cream);
+  font-family: "Fraunces", serif;
+  font-size: 1.4rem;
+  line-height: 1.45;
+  white-space: pre-wrap;
+}
+
+.treasured-content-wrap {
+  position: relative;
+  width: 100%;
+}
+
+.treasured-content-clamped {
+  display: -webkit-box;
+  -webkit-line-clamp: 5;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* fade sits over the clamp, tinted to the card's own glass */
+.treasured-fade {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 42px;
+  background: linear-gradient(to bottom, rgba(36, 26, 32, 0), rgba(36, 26, 32, 0.85));
+  pointer-events: none;
+}
+
+.treasured-card-clickable { cursor: pointer; }
+
+.treasured-expand-hint {
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--brass-bright);
+  font-family: "Work Sans", sans-serif;
+  font-weight: 600;
+  font-size: 0.82rem;
+  cursor: pointer;
+}
+
+.treasured-expand-hint:hover { text-decoration: underline; }
+
+/* small, consistent thumbnail on the card — the modal shows it full size */
+.treasured-thumb {
+  display: block;
+  width: 100%;
+  height: 130px;
+  object-fit: cover;
+  border-radius: 10px;
+  background: rgba(244, 234, 214, 0.06);
+}
+
+.treasured-card:nth-child(even) { transform: rotate(-0.6deg); }
+.treasured-card:nth-child(3n)   { transform: rotate(0.6deg); }
+
+.treasured-card:hover {
+  transform: translateY(-6px) rotate(0deg);
+  border-color: rgba(195, 154, 95, 0.55);
+}
