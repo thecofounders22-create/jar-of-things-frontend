@@ -124,7 +124,7 @@ function AddNote() {
                             maxLength="5000"
                         />
 
-                        <p className="character-count">{content.length}/1000</p>
+                        <p className="character-count">{content.length}/5000</p>
 
                         <label htmlFor="note-category">Choose a corner of the jar</label>
 
