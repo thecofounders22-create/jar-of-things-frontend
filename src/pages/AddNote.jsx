@@ -149,8 +149,8 @@ function AddNote() {
                             value={createdBy}
                             onChange={(event) => setCreatedBy(event.target.value)}
                         >
-                            <option value="1">Jar Owner</option>
-                            <option value="2">Best Friend</option>
+                            <option value="1">Aaradhy</option>
+                            <option value="2">Preeti</option>
                         </select>
 
                         <label htmlFor="unlock-time">
