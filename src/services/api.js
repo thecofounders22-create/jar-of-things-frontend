@@ -9,6 +9,7 @@ const api = axios.create({
 
 export const getRandomNote = () => api.get("/api/notes/random");
 export const getAllNotes = () => api.get("/api/notes");
+
 export const getCategories = () => api.get("/api/categories");
 
 export const createNote = (noteData, imageFile) => {
