@@ -10,6 +10,7 @@ import AccessGate from "./pages/AccessGate";
 
 import {
   motion,
+  AnimatePresence,
   useMotionValue,
   useSpring,
   useTransform,
@@ -153,8 +154,6 @@ function Welcome() {
     "✦",
   ];
 
-
-
   const handleOpenJar = () => {
     if (isOpening) {
       return;
@@ -218,7 +217,6 @@ function Welcome() {
               disabled={isOpening}
             >
               {isOpening ? "Opening..." : "Open the jar"}
-
             </motion.button>
 
             <p className="bottom-message">
@@ -297,6 +295,9 @@ function JarRoom() {
 
   const [collecting, setCollecting] = useState(false);
   const [collectionMessage, setCollectionMessage] = useState("");
+
+  // Whether the full note is open in the expanded "letter" view
+  const [isExpanded, setIsExpanded] = useState(false);
 
   const userId = 1;
 
@@ -429,11 +430,35 @@ function JarRoom() {
   useEffect(() => {
     tiltX.set(0);
     tiltY.set(0);
+    setIsExpanded(false);
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentIndex]);
 
+  // Close the expanded note on Escape
+  useEffect(() => {
+    if (!isExpanded) {
+      return;
+    }
+
+    const handleKeyDown = (event) => {
+      if (event.key === "Escape") {
+        setIsExpanded(false);
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isExpanded]);
+
   const currentNote = notes[currentIndex];
+
+  // A note is "long" once it would visibly overflow the card, so we
+  // clamp it to a short preview and let the person open it fully.
+  const isLongNote = Boolean(
+    currentNote && currentNote.content && currentNote.content.length > 220
+  );
 
   // --------------------
   // Note Navigation
@@ -614,7 +639,7 @@ function JarRoom() {
             <div className="note-stack-layer stack-mid"></div>
 
             <motion.article
-              className="note-card"
+              className={`note-card${isLongNote ? " note-card-clickable" : ""}`}
               key={currentNote.id}
               initial={{
                 opacity: 0,
@@ -641,6 +666,7 @@ function JarRoom() {
               }}
               onMouseMove={handleNoteMouseMove}
               onMouseLeave={handleNoteMouseLeave}
+              onClick={() => isLongNote && setIsExpanded(true)}
             >
               <span className="note-ribbon"></span>
 
@@ -671,9 +697,29 @@ function JarRoom() {
                   <span>♡</span>
                 </div>
 
-                <p className="note-content">
-                  {currentNote.content}
-                </p>
+                <div className="note-content-wrap">
+                  <p
+                    className={`note-content${
+                      isLongNote ? " note-content-clamped" : ""
+                    }`}
+                  >
+                    {currentNote.content}
+                  </p>
+
+                  {isLongNote && <div className="note-fade-bottom"></div>}
+                </div>
+
+                {isLongNote && (
+                  <button
+                    className="note-expand-hint"
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      setIsExpanded(true);
+                    }}
+                  >
+                    Read the rest →
+                  </button>
+                )}
 
                 {/* Attached memory image */}
                 {currentNote.imageUrl && (
@@ -785,6 +831,75 @@ function JarRoom() {
           </div>
         </div>
       </section>
+
+      {/* Expanded "letter" view for long notes */}
+      <AnimatePresence>
+        {isExpanded && currentNote && (
+          <motion.div
+            className="note-modal-backdrop"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.25 }}
+            onClick={() => setIsExpanded(false)}
+          >
+            <motion.article
+              className="note-modal-card"
+              initial={{ opacity: 0, y: 40, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 20, scale: 0.97 }}
+              transition={{ type: "spring", stiffness: 170, damping: 20 }}
+              onClick={(event) => event.stopPropagation()}
+            >
+              <button
+                className="note-modal-close"
+                onClick={() => setIsExpanded(false)}
+                aria-label="Fold the note back up"
+              >
+                ✕
+              </button>
+
+              <span className="note-quote-mark note-quote-mark-modal" aria-hidden="true">
+                ❝
+              </span>
+
+              <div className="note-card-inner">
+                <div className="note-card-top">
+                  <span>
+                    note {currentIndex + 1} of {notes.length}
+                  </span>
+
+                  <span>♡</span>
+                </div>
+
+                <p className="note-content note-content-full">
+                  {currentNote.content}
+                </p>
+
+                {currentNote.imageUrl && (
+                  <img
+                    className="note-memory-image"
+                    src={currentNote.imageUrl}
+                    alt="Memory attached to this note"
+                  />
+                )}
+
+                {currentNote.category && (
+                  <span className="note-category">
+                    {currentNote.category.name}
+                  </span>
+                )}
+
+                <div className="note-card-bottom">
+                  <span className="note-footer">
+                    kept with love, from the jar
+                  </span>
+                </div>
+              </div>
+            </motion.article>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </main>
   );
 }
@@ -797,17 +912,8 @@ function App() {
     () => sessionStorage.getItem("jarAccessGranted") === "true"
   );
 
-
   if (!isUnlocked) {
     return <AccessGate onUnlock={() => setIsUnlocked(true)} />;
-  }
-
-  function YourNavbar({ onLogout }) {
-    return (
-      <button onClick={onLogout}>
-        Lock the Jar 🔒
-      </button>
-    );
   }
 
   const handleLogout = () => {
@@ -817,7 +923,6 @@ function App() {
 
   return (
     <BrowserRouter>
-
       <button onClick={handleLogout} className="lock-jar-button">
         🔒 Lock the Jar
       </button>
