@@ -7,20 +7,22 @@ const api = axios.create({
   },
 });
 
-export const getRandomNote = () => api.get("/notes/random");
-export const getAllNotes = () => api.get("/notes");
-export const getCategories = () => api.get("/categories");
+export const getRandomNote = () => api.get("/api/notes/random");
+export const getAllNotes = () => api.get("/api/notes");
+export const getCategories = () => api.get("/api/categories");
+
 export const createNote = (noteData, imageFile) => {
-  const formData = new FormData();
-
-  formData.append("note", JSON.stringify(noteData));
-
-  if (imageFile) {
-    formData.append("image", imageFile);
-  }
-
-  return api.post("/notes", formData);
-};
+    const formData = new FormData();
+  
+    formData.append("note", JSON.stringify(noteData));
+  
+    if (imageFile) {
+      formData.append("image", imageFile);
+    }
+  
+    return api.post("/api/notes", formData);
+  };
+  
 
 export const getCollectedNotes = (userId) =>
   api.get(`/collections?userId=${userId}`);
