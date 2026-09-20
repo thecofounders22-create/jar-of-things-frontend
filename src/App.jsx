@@ -282,6 +282,10 @@ function Welcome() {
 // Jar Room Page
 // --------------------
 
+// Drop-in replacement for the JarRoom function in App.jsx.
+// All data logic is unchanged — only the layout and a "draw a random
+// note" interaction on the jar are new.
+
 function JarRoom() {
   const navigate = useNavigate();
 
@@ -295,52 +299,23 @@ function JarRoom() {
 
   const [collecting, setCollecting] = useState(false);
   const [collectionMessage, setCollectionMessage] = useState("");
-
-  // Whether the full note is open in the expanded "letter" view
   const [isExpanded, setIsExpanded] = useState(false);
+  const [drawing, setDrawing] = useState(false);
 
   const userId = 1;
 
-  // --------------------
-  // Note Card Tilt
-  // --------------------
-
+  // ---- tilt (unchanged) ----
   const tiltX = useMotionValue(0);
   const tiltY = useMotionValue(0);
-
-  const springX = useSpring(tiltX, {
-    stiffness: 150,
-    damping: 20,
-  });
-
-  const springY = useSpring(tiltY, {
-    stiffness: 150,
-    damping: 20,
-  });
-
-  const noteRotateX = useTransform(
-    springY,
-    [-40, 40],
-    [7, -7]
-  );
-
-  const noteRotateY = useTransform(
-    springX,
-    [-40, 40],
-    [-7, 7]
-  );
+  const springX = useSpring(tiltX, { stiffness: 150, damping: 20 });
+  const springY = useSpring(tiltY, { stiffness: 150, damping: 20 });
+  const noteRotateX = useTransform(springY, [-40, 40], [6, -6]);
+  const noteRotateY = useTransform(springX, [-40, 40], [-6, 6]);
 
   const handleNoteMouseMove = (event) => {
-    const bounds =
-      event.currentTarget.getBoundingClientRect();
-
-    tiltX.set(
-      event.clientX - bounds.left - bounds.width / 2
-    );
-
-    tiltY.set(
-      event.clientY - bounds.top - bounds.height / 2
-    );
+    const b = event.currentTarget.getBoundingClientRect();
+    tiltX.set(event.clientX - b.left - b.width / 2);
+    tiltY.set(event.clientY - b.top - b.height / 2);
   };
 
   const handleNoteMouseLeave = () => {
@@ -348,19 +323,13 @@ function JarRoom() {
     tiltY.set(0);
   };
 
-  // --------------------
-  // Load Jar Data
-  // --------------------
-
+  // ---- load (unchanged) ----
   const loadJarData = async () => {
     try {
       setLoading(true);
       setError("");
 
-      const [
-        notesResponse,
-        categoryResponse,
-      ] = await Promise.all([
+      const [notesResponse, categoryResponse] = await Promise.all([
         getAllNotes(),
         getCategories(),
       ]);
@@ -370,54 +339,28 @@ function JarRoom() {
       setCurrentIndex(0);
 
       try {
-        const collectedResponse =
-          await getCollectedNotes(userId);
-
-        console.log(
-          "Collected notes response:",
-          collectedResponse.data
-        );
-
-        const collections = Array.isArray(
-          collectedResponse.data
-        )
+        const collectedResponse = await getCollectedNotes(userId);
+        const collections = Array.isArray(collectedResponse.data)
           ? collectedResponse.data
           : [];
 
         const savedIds = collections
-          .map((collection) => {
-            if (collection.note?.id !== undefined) {
-              return Number(collection.note.id);
-            }
-
-            if (collection.noteId !== undefined) {
-              return Number(collection.noteId);
-            }
-
-            if (collection.note?.noteId !== undefined) {
-              return Number(collection.note.noteId);
-            }
-
+          .map((c) => {
+            if (c.note?.id !== undefined) return Number(c.note.id);
+            if (c.noteId !== undefined) return Number(c.noteId);
+            if (c.note?.noteId !== undefined) return Number(c.note.noteId);
             return null;
           })
-          .filter(
-            (id) => id !== null && !Number.isNaN(id)
-          );
-
-        console.log("Saved note IDs:", savedIds);
+          .filter((id) => id !== null && !Number.isNaN(id));
 
         setCollectedNoteIds(savedIds);
       } catch (collectionError) {
-        console.error(
-          "Could not load collected notes:",
-          collectionError
-        );
-
+        console.error("Could not load collected notes:", collectionError);
         setCollectedNoteIds([]);
       }
     } catch (err) {
       console.error("Could not load jar data:", err);
-      setError("The jar is sleeping. Please try again.");
+      setError("The jar didn't open. Check your connection and try again.");
     } finally {
       setLoading(false);
     }
@@ -431,72 +374,62 @@ function JarRoom() {
     tiltX.set(0);
     tiltY.set(0);
     setIsExpanded(false);
-
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentIndex]);
 
-  // Close the expanded note on Escape
+  // Arrow keys move through the jar; Escape folds a note back up.
   useEffect(() => {
-    if (!isExpanded) {
-      return;
-    }
-
-    const handleKeyDown = (event) => {
-      if (event.key === "Escape") {
-        setIsExpanded(false);
-      }
+    const onKey = (event) => {
+      if (event.key === "Escape") return setIsExpanded(false);
+      if (isExpanded) return;
+      if (event.key === "ArrowRight") nextNote();
+      if (event.key === "ArrowLeft") previousNote();
     };
 
-    window.addEventListener("keydown", handleKeyDown);
-
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isExpanded]);
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isExpanded, notes.length]);
 
   const currentNote = notes[currentIndex];
 
-  // A note is "long" once it would visibly overflow the card, so we
-  // clamp it to a short preview and let the person open it fully.
   const isLongNote = Boolean(
     currentNote && currentNote.content && currentNote.content.length > 220
   );
 
-  // --------------------
-  // Note Navigation
-  // --------------------
-
   const nextNote = () => {
-    setCurrentIndex((previousIndex) =>
-      Math.min(
-        previousIndex + 1,
-        notes.length - 1
-      )
-    );
-
+    setCurrentIndex((i) => Math.min(i + 1, notes.length - 1));
     setCollectionMessage("");
   };
 
   const previousNote = () => {
-    setCurrentIndex((previousIndex) =>
-      Math.max(previousIndex - 1, 0)
-    );
-
+    setCurrentIndex((i) => Math.max(i - 1, 0));
     setCollectionMessage("");
   };
 
-  // --------------------
-  // Collect Note
-  // --------------------
+  // Shake the jar: land on a note you weren't already looking at.
+  const drawRandomNote = () => {
+    if (notes.length < 2 || drawing) return;
 
+    setDrawing(true);
+    setCollectionMessage("");
+
+    setTimeout(() => {
+      let pick = currentIndex;
+      while (pick === currentIndex) {
+        pick = Math.floor(Math.random() * notes.length);
+      }
+      setCurrentIndex(pick);
+      setDrawing(false);
+    }, 520);
+  };
+
+  // ---- collect (unchanged) ----
   const handleCollectNote = async () => {
-    if (!currentNote || collecting) {
-      return;
-    }
+    if (!currentNote || collecting) return;
 
     if (collectedNoteIds.includes(currentNote.id)) {
-      setCollectionMessage(
-        "You already treasured this note. 💛"
-      );
-
+      setCollectionMessage("This one is already in your treasures.");
       return;
     }
 
@@ -506,333 +439,234 @@ function JarRoom() {
 
       await collectNote(currentNote.id, userId);
 
-      setCollectedNoteIds((previousIds) => [
-        ...previousIds,
-        currentNote.id,
-      ]);
-
-      setCollectionMessage(
-        "Saved to your treasures. 💛"
-      );
+      setCollectedNoteIds((ids) => [...ids, currentNote.id]);
+      setCollectionMessage("Kept. It's in your treasures now.");
     } catch (err) {
       console.error("Collection error:", err);
 
       if (err.response?.status === 409) {
-        setCollectedNoteIds((previousIds) =>
-          previousIds.includes(currentNote.id)
-            ? previousIds
-            : [...previousIds, currentNote.id]
+        setCollectedNoteIds((ids) =>
+          ids.includes(currentNote.id) ? ids : [...ids, currentNote.id]
         );
-
-        setCollectionMessage(
-          "You already treasured this note. 💛"
-        );
+        setCollectionMessage("This one is already in your treasures.");
       } else {
-        setCollectionMessage(
-          "This note could not be saved."
-        );
+        setCollectionMessage("That didn't save. Try keeping it again.");
       }
     } finally {
       setCollecting(false);
     }
   };
 
-  // --------------------
-  // JSX
-  // --------------------
+  const isKept = currentNote && collectedNoteIds.includes(currentNote.id);
 
   return (
-    <main className="jar-room">
+    <main className="desk">
       <div className="light-beam room-beam"></div>
 
-      <header className="room-header">
-        <button
-          className="back-button"
-          onClick={() => navigate("/")}
-        >
-          ← Back
+      {/* ---------- LEFT RAIL: the jar lives here permanently ---------- */}
+      <aside className="desk-rail">
+        <button className="rail-back" onClick={() => navigate("/")}>
+          ← the doorway
         </button>
 
-        <p className="room-label">
-          Your little universe
-        </p>
-
-        <div className="room-counter">
-          {notes.length} notes tucked away
-        </div>
-      </header>
-
-      <section className="jar-room-content">
-        <motion.div
-          className="room-heading"
-          initial={{
-            opacity: 0,
-            y: -20,
-          }}
-          animate={{
-            opacity: 1,
-            y: 0,
-          }}
+        <motion.button
+          className="rail-jar"
+          onClick={drawRandomNote}
+          animate={
+            drawing
+              ? { rotate: [0, -7, 6, -4, 3, 0], y: [0, -6, 0] }
+              : { rotate: 0, y: [0, -7, 0] }
+          }
+          transition={
+            drawing
+              ? { duration: 0.52, ease: "easeInOut" }
+              : { duration: 5, repeat: Infinity, ease: "easeInOut" }
+          }
+          aria-label="Shake the jar for a random note"
         >
-          <h1>Pick a little piece of magic</h1>
+          <span className="jar-ring big-ring"></span>
 
-          <p>
-            Every note holds a tiny feeling, a memory, or a reason
-            to smile.
-          </p>
-        </motion.div>
-
-        <motion.div
-          className="big-jar"
-          initial={{
-            opacity: 0,
-            scale: 0.9,
-            y: 16,
-          }}
-          animate={{
-            opacity: 1,
-            scale: 1,
-            y: [0, -8, 0],
-          }}
-          transition={{
-            opacity: {
-              duration: 0.6,
-              delay: 0.1,
-            },
-            scale: {
-              duration: 0.6,
-              delay: 0.1,
-            },
-            y: {
-              duration: 4,
-              repeat: Infinity,
-              ease: "easeInOut",
-              delay: 0.7,
-            },
-          }}
-        >
-          <div className="jar-ring big-ring"></div>
-
-          <div className="jar-glass big-glass">
+          <span className="jar-glass big-glass">
             <span className="note-scrap scrap-1"></span>
             <span className="note-scrap scrap-2"></span>
             <span className="note-scrap scrap-3"></span>
             <span className="note-scrap scrap-4"></span>
+            <span className="jar-glass-sheen"></span>
+          </span>
 
-            <div className="jar-glass-sheen"></div>
-          </div>
+          <span className="jar-shadow big-shadow"></span>
+        </motion.button>
 
-          <div className="jar-shadow big-shadow"></div>
-        </motion.div>
+        <p className="rail-hint">Shake it for a note at random</p>
 
-        {loading ? (
-          <p className="status-message">
-            Looking for your little notes...
-          </p>
-        ) : error ? (
-          <p className="status-message error-message">
-            {error}
-          </p>
-        ) : currentNote ? (
-          <div className="note-stack">
-            <div className="note-stack-layer stack-back"></div>
-            <div className="note-stack-layer stack-mid"></div>
+        <p className="rail-count">
+          <strong>{notes.length}</strong> folded up
+          <br />
+          <strong>{collectedNoteIds.length}</strong> kept
+        </p>
 
-            <motion.article
-              className={`note-card${isLongNote ? " note-card-clickable" : ""}`}
-              key={currentNote.id}
-              initial={{
-                opacity: 0,
-                y: 35,
-                scale: 0.94,
-                rotate: -6,
-              }}
-              animate={{
-                opacity: 1,
-                y: 0,
-                scale: 1,
-                rotate: -1,
-              }}
-              transition={{
-                type: "spring",
-                stiffness: 140,
-                damping: 15,
-                delay: 0.15,
-              }}
-              style={{
-                rotateX: noteRotateX,
-                rotateY: noteRotateY,
-                transformPerspective: 900,
-              }}
-              onMouseMove={handleNoteMouseMove}
-              onMouseLeave={handleNoteMouseLeave}
-              onClick={() => isLongNote && setIsExpanded(true)}
-            >
-              <span className="note-ribbon"></span>
-
-              <span
-                className={`washi-tape ${[
-                  "tape-rose",
-                  "tape-sage",
-                  "tape-brass",
-                ][currentIndex % 3]
-                  }`}
-              ></span>
-
-              <span className="note-pin"></span>
-
-              <span
-                className="note-quote-mark"
-                aria-hidden="true"
-              >
-                ❝
-              </span>
-
-              <div className="note-card-inner">
-                <div className="note-card-top">
-                  <span>
-                    note {currentIndex + 1} of {notes.length}
-                  </span>
-
-                  <span>♡</span>
-                </div>
-
-                <div className="note-content-wrap">
-                  <p
-                    className={`note-content${
-                      isLongNote ? " note-content-clamped" : ""
-                    }`}
-                  >
-                    {currentNote.content}
-                  </p>
-
-                  {isLongNote && <div className="note-fade-bottom"></div>}
-                </div>
-
-                {isLongNote && (
-                  <button
-                    className="note-expand-hint"
-                    onClick={(event) => {
-                      event.stopPropagation();
-                      setIsExpanded(true);
-                    }}
-                  >
-                    Read the rest →
-                  </button>
-                )}
-
-                {/* Attached memory image */}
-                {currentNote.imageUrl && (
-                  <img
-                    className="note-memory-image"
-                    src={currentNote.imageUrl}
-                    alt="Memory attached to this note"
-                  />
-                )}
-
-                {currentNote.category && (
-                  <span className="note-category">
-                    {currentNote.category.name}
-                  </span>
-                )}
-
-                <div className="note-card-bottom">
-                  <span className="note-footer">
-                    kept with love, from the jar
-                  </span>
-                </div>
-              </div>
-            </motion.article>
-          </div>
-        ) : (
-          <p className="status-message">
-            The jar is empty for now. 💛
-          </p>
-        )}
-
-        {/* Collect Note Button */}
-        {currentNote && (
-          <button
-            className="collect-button"
-            onClick={handleCollectNote}
-            disabled={
-              collecting ||
-              collectedNoteIds.includes(currentNote.id)
-            }
-          >
-            {collecting
-              ? "Saving..."
-              : collectedNoteIds.includes(currentNote.id)
-                ? "💛 Already treasured"
-                : "♡ Keep this note"}
-          </button>
-        )}
-
-        {collectionMessage && (
-          <p className="collection-message">
-            {collectionMessage}
-          </p>
-        )}
-
-        {/* Note Navigation */}
-        {notes.length > 0 && (
-          <div className="note-navigation">
-            <button
-              className="note-nav-button"
-              onClick={previousNote}
-              disabled={currentIndex === 0}
-            >
-              ← Previous
-            </button>
-
-            <button
-              className="note-nav-button"
-              onClick={nextNote}
-              disabled={
-                currentIndex === notes.length - 1
-              }
-            >
-              Next →
-            </button>
-          </div>
-        )}
-
-        {/* Add Note Button */}
-        <button
-          className="reveal-button"
-          onClick={() => navigate("/add-note")}
-        >
-          + Add a little thing
-        </button>
-
-        {/* Collection Page Button */}
-        <button
-          className="collection-link"
-          onClick={() => navigate("/collection")}
-        >
-          ♡ View treasured notes
-        </button>
-
-        {/* Categories */}
-        <div className="category-list">
-          <p className="category-heading">
-            Corners of the jar
-          </p>
-
-          <div className="category-pills">
+        {categories.length > 0 && (
+          <div className="rail-tags">
             {categories.map((category) => (
-              <span
-                className="category-pill"
-                key={category.id}
-              >
+              <span className="rail-tag" key={category.id}>
                 {category.name}
               </span>
             ))}
           </div>
+        )}
+
+        <div className="rail-actions">
+          <button onClick={() => navigate("/add-note")}>Fold a new one</button>
+          <button onClick={() => navigate("/collection")}>Your treasures</button>
         </div>
+      </aside>
+
+      {/* ---------- RIGHT STAGE: one note, nothing else ---------- */}
+      <section className="desk-stage">
+        {loading ? (
+          <p className="status-message">Unfolding…</p>
+        ) : error ? (
+          <p className="status-message error-message">{error}</p>
+        ) : !currentNote ? (
+          <div className="stage-empty">
+            <h2>Nothing in here yet</h2>
+            <p>The jar fills up one small thing at a time. Start it off.</p>
+            <button onClick={() => navigate("/add-note")}>Fold the first one</button>
+          </div>
+        ) : (
+          <>
+            <div className="note-theatre">
+              <button
+                className="theatre-arrow"
+                onClick={previousNote}
+                disabled={currentIndex === 0}
+                aria-label="Previous note"
+              >
+                ←
+              </button>
+
+              <div className="note-stack">
+                <div className="note-stack-layer stack-back"></div>
+                <div className="note-stack-layer stack-mid"></div>
+
+                <motion.article
+                  className={`note-card${isLongNote ? " note-card-clickable" : ""}`}
+                  key={currentNote.id}
+                  initial={{ opacity: 0, y: 30, scale: 0.95, rotate: -5 }}
+                  animate={{ opacity: 1, y: 0, scale: 1, rotate: -1 }}
+                  transition={{ type: "spring", stiffness: 140, damping: 15 }}
+                  style={{
+                    rotateX: noteRotateX,
+                    rotateY: noteRotateY,
+                    transformPerspective: 900,
+                  }}
+                  onMouseMove={handleNoteMouseMove}
+                  onMouseLeave={handleNoteMouseLeave}
+                  onClick={() => isLongNote && setIsExpanded(true)}
+                >
+                  <span className="note-ribbon"></span>
+
+                  <span
+                    className={`washi-tape ${
+                      ["tape-rose", "tape-sage", "tape-brass"][currentIndex % 3]
+                    }`}
+                  ></span>
+
+                  <span className="note-pin"></span>
+
+                  <div className="note-card-inner">
+                    <div className="note-content-wrap">
+                      <p
+                        className={`note-content${
+                          isLongNote ? " note-content-clamped" : ""
+                        }`}
+                      >
+                        {currentNote.content}
+                      </p>
+
+                      {isLongNote && <div className="note-fade-bottom"></div>}
+                    </div>
+
+                    {isLongNote && (
+                      <button
+                        className="note-expand-hint"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setIsExpanded(true);
+                        }}
+                      >
+                        Read the rest
+                      </button>
+                    )}
+
+                    {currentNote.imageUrl && (
+                      <img
+                        className="note-memory-image"
+                        src={currentNote.imageUrl}
+                        alt="Memory attached to this note"
+                      />
+                    )}
+
+                    <div className="note-card-bottom">
+                      {currentNote.category && (
+                        <span className="note-category">
+                          {currentNote.category.name}
+                        </span>
+                      )}
+
+                      <button
+                        className={`wax-seal${isKept ? " wax-seal-kept" : ""}`}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleCollectNote();
+                        }}
+                        disabled={collecting || isKept}
+                        title={isKept ? "Already kept" : "Keep this note"}
+                      >
+                        {collecting ? "…" : isKept ? "✓" : "♡"}
+                        <span className="wax-seal-label">
+                          {isKept ? "Kept" : "Keep"}
+                        </span>
+                      </button>
+                    </div>
+                  </div>
+                </motion.article>
+              </div>
+
+              <button
+                className="theatre-arrow"
+                onClick={nextNote}
+                disabled={currentIndex === notes.length - 1}
+                aria-label="Next note"
+              >
+                →
+              </button>
+            </div>
+
+            {/* the jar's contents, strung out as beads on a thread */}
+            <div className="bead-thread" role="tablist" aria-label="Notes in the jar">
+              {notes.map((note, index) => (
+                <button
+                  key={note.id}
+                  className={`bead${index === currentIndex ? " bead-active" : ""}${
+                    collectedNoteIds.includes(note.id) ? " bead-kept" : ""
+                  }`}
+                  onClick={() => {
+                    setCurrentIndex(index);
+                    setCollectionMessage("");
+                  }}
+                  aria-label={`Note ${index + 1}`}
+                  aria-selected={index === currentIndex}
+                />
+              ))}
+            </div>
+
+            <p className="collection-message">{collectionMessage}</p>
+          </>
+        )}
       </section>
 
-      {/* Expanded "letter" view for long notes */}
+      {/* ---------- expanded letter view ---------- */}
       <AnimatePresence>
         {isExpanded && currentNote && (
           <motion.div
@@ -849,7 +683,7 @@ function JarRoom() {
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 20, scale: 0.97 }}
               transition={{ type: "spring", stiffness: 170, damping: 20 }}
-              onClick={(event) => event.stopPropagation()}
+              onClick={(e) => e.stopPropagation()}
             >
               <button
                 className="note-modal-close"
@@ -859,19 +693,7 @@ function JarRoom() {
                 ✕
               </button>
 
-              <span className="note-quote-mark note-quote-mark-modal" aria-hidden="true">
-                ❝
-              </span>
-
               <div className="note-card-inner">
-                <div className="note-card-top">
-                  <span>
-                    note {currentIndex + 1} of {notes.length}
-                  </span>
-
-                  <span>♡</span>
-                </div>
-
                 <p className="note-content note-content-full">
                   {currentNote.content}
                 </p>
@@ -884,16 +706,13 @@ function JarRoom() {
                   />
                 )}
 
-                {currentNote.category && (
-                  <span className="note-category">
-                    {currentNote.category.name}
-                  </span>
-                )}
-
                 <div className="note-card-bottom">
-                  <span className="note-footer">
-                    kept with love, from the jar
-                  </span>
+                  {currentNote.category && (
+                    <span className="note-category">
+                      {currentNote.category.name}
+                    </span>
+                  )}
+                  <span className="note-footer">from the jar</span>
                 </div>
               </div>
             </motion.article>
