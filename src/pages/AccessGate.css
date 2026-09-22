@@ -1,151 +1,1078 @@
-.access-gate {
+/* =========================================================
+   ACCESS GATE
+   The Jar of Little Things
+   ========================================================= */
+
+   .access-gate {
     min-height: 100vh;
+    width: 100%;
     position: relative;
     overflow: hidden;
+
     display: flex;
     justify-content: center;
     align-items: center;
+
     padding: 2rem;
+    box-sizing: border-box;
+
+    color: #f8f1e8;
+
     background:
-      radial-gradient(
-        circle at 20% 20%,
-        rgba(177, 145, 204, 0.2),
-        transparent 35%
-      ),
-      radial-gradient(
-        circle at 80% 80%,
-        rgba(226, 181, 146, 0.2),
-        transparent 35%
-      ),
-      #171421;
-    color: #f8efff;
-  }
-  
-  .access-glow {
+        radial-gradient(
+            circle at 50% 45%,
+            rgba(143, 113, 157, 0.14),
+            transparent 30%
+        ),
+        radial-gradient(
+            circle at 10% 90%,
+            rgba(196, 145, 116, 0.10),
+            transparent 35%
+        ),
+        linear-gradient(
+            135deg,
+            #0c0b13 0%,
+            #15121e 45%,
+            #100e17 100%
+        );
+}
+
+
+/* =========================================================
+   NIGHT SKY
+   ========================================================= */
+
+.night-sky {
     position: absolute;
-    width: 300px;
-    height: 300px;
-    border-radius: 50%;
-    filter: blur(90px);
+    inset: 0;
+
     pointer-events: none;
-  }
-  
-  .access-glow-one {
-    top: -100px;
-    left: -100px;
-    background: rgba(190, 135, 225, 0.25);
-  }
-  
-  .access-glow-two {
-    right: -100px;
-    bottom: -100px;
-    background: rgba(239, 183, 137, 0.2);
-  }
-  
-  .access-card {
-    position: relative;
+
+    background:
+        radial-gradient(
+            ellipse at center top,
+            rgba(116, 91, 139, 0.12),
+            transparent 48%
+        );
+
+    z-index: 0;
+}
+
+
+/* =========================================================
+   MOON
+   ========================================================= */
+
+.moon {
+    position: absolute;
+
+    width: 7rem;
+    height: 7rem;
+
+    top: 8%;
+    right: 10%;
+
+    border-radius: 50%;
+
+    background:
+        radial-gradient(
+            circle at 35% 30%,
+            #fffaf1 0%,
+            #eee1cf 55%,
+            #c8b8a6 100%
+        );
+
+    opacity: 0.88;
+
+    box-shadow:
+        0 0 35px rgba(238, 225, 207, 0.12),
+        0 0 100px rgba(238, 225, 207, 0.08);
+
     z-index: 1;
-    width: min(100%, 480px);
-    padding: 3rem 2.5rem;
-    text-align: center;
-    border: 1px solid rgba(255, 255, 255, 0.16);
-    border-radius: 28px;
-    background: rgba(255, 255, 255, 0.07);
-    box-shadow: 0 24px 80px rgba(0, 0, 0, 0.35);
-    backdrop-filter: blur(20px);
-  }
-  
-  .access-jar {
-    font-size: 5rem;
-    margin-bottom: 1rem;
-  }
-  
-  .access-eyebrow {
-    margin-bottom: 0.8rem;
-    color: #d9bde9;
-    font-size: 0.8rem;
-    letter-spacing: 0.18em;
-    text-transform: uppercase;
-  }
-  
-  .access-card h1 {
-    margin: 0;
+}
+
+.moon::before,
+.moon::after {
+    content: "";
+
+    position: absolute;
+
+    border-radius: 50%;
+
+    background: rgba(150, 132, 125, 0.12);
+}
+
+.moon::before {
+    width: 1.2rem;
+    height: 1.2rem;
+
+    top: 28%;
+    left: 25%;
+}
+
+.moon::after {
+    width: 0.8rem;
+    height: 0.8rem;
+
+    top: 58%;
+    left: 62%;
+}
+
+.moon-glow {
+    position: absolute;
+
+    inset: -2rem;
+
+    border-radius: 50%;
+
+    background: rgba(238, 225, 207, 0.035);
+
+    filter: blur(20px);
+}
+
+
+/* =========================================================
+   STARS
+   ========================================================= */
+
+.stars {
+    position: absolute;
+    inset: 0;
+
+    pointer-events: none;
+
+    z-index: 1;
+}
+
+.stars span {
+    position: absolute;
+
+    color: rgba(246, 231, 209, 0.65);
+
     font-family: Georgia, serif;
-    font-size: clamp(2rem, 6vw, 3rem);
-    font-weight: 400;
-    line-height: 1.15;
-  }
-  
-  .access-description {
-    margin: 1.2rem auto 2rem;
-    max-width: 340px;
-    color: rgba(248, 239, 255, 0.72);
-    line-height: 1.7;
-  }
-  
-  .access-form {
+
+    animation:
+        starFloat 5s ease-in-out infinite,
+        starTwinkle 3s ease-in-out infinite;
+}
+
+.stars span:nth-child(1) {
+    top: 18%;
+    left: 15%;
+    font-size: 1rem;
+    animation-delay: 0s;
+}
+
+.stars span:nth-child(2) {
+    top: 28%;
+    left: 8%;
+    font-size: 0.7rem;
+    animation-delay: 1s;
+}
+
+.stars span:nth-child(3) {
+    top: 12%;
+    left: 42%;
+    font-size: 0.8rem;
+    animation-delay: 1.8s;
+}
+
+.stars span:nth-child(4) {
+    top: 38%;
+    right: 13%;
+    font-size: 0.6rem;
+    animation-delay: 0.7s;
+}
+
+.stars span:nth-child(5) {
+    top: 60%;
+    right: 7%;
+    font-size: 1rem;
+    animation-delay: 2s;
+}
+
+.stars span:nth-child(6) {
+    bottom: 18%;
+    left: 12%;
+    font-size: 0.7rem;
+    animation-delay: 1.3s;
+}
+
+.stars span:nth-child(7) {
+    bottom: 12%;
+    right: 25%;
+    font-size: 0.8rem;
+    animation-delay: 2.5s;
+}
+
+.stars span:nth-child(8) {
+    bottom: 28%;
+    left: 25%;
+    font-size: 0.9rem;
+    animation-delay: 0.5s;
+}
+
+@keyframes starFloat {
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-7px);
+    }
+}
+
+@keyframes starTwinkle {
+    0%,
+    100% {
+        opacity: 0.25;
+    }
+
+    50% {
+        opacity: 0.9;
+    }
+}
+
+
+/* =========================================================
+   AMBIENT GLOW
+   ========================================================= */
+
+.ambient-glow {
+    position: absolute;
+
+    width: 26rem;
+    height: 26rem;
+
+    border-radius: 50%;
+
+    filter: blur(110px);
+
+    pointer-events: none;
+
+    z-index: 0;
+}
+
+.ambient-one {
+    top: -12rem;
+    left: -10rem;
+
+    background: rgba(130, 92, 151, 0.12);
+}
+
+.ambient-two {
+    right: -12rem;
+    bottom: -12rem;
+
+    background: rgba(190, 133, 105, 0.10);
+}
+
+
+/* =========================================================
+   MAIN SCENE
+   ========================================================= */
+
+.access-scene {
+    position: relative;
+
+    z-index: 5;
+
+    width: min(100%, 520px);
+
     display: flex;
     flex-direction: column;
-    gap: 0.8rem;
-    text-align: left;
-  }
-  
-  .access-form label {
-    color: rgba(248, 239, 255, 0.85);
+    align-items: center;
+
+    text-align: center;
+}
+
+
+/* =========================================================
+   TOP LABEL
+   ========================================================= */
+
+.access-label {
+    margin: 0 0 1.8rem;
+
+    color: rgba(229, 210, 188, 0.48);
+
+    font-family:
+        "Courier New",
+        monospace;
+
+    font-size: 0.62rem;
+
+    letter-spacing: 0.28em;
+
+    line-height: 1.6;
+}
+
+
+/* =========================================================
+   JAR
+   ========================================================= */
+
+.jar-wrapper {
+    position: relative;
+
+    width: 210px;
+    height: 230px;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    margin-bottom: 0.5rem;
+}
+
+.jar-aura {
+    position: absolute;
+
+    width: 170px;
+    height: 170px;
+
+    border-radius: 50%;
+
+    background:
+        radial-gradient(
+            circle,
+            rgba(225, 186, 145, 0.16),
+            transparent 65%
+        );
+
+    filter: blur(10px);
+
+    animation: jarAura 4s ease-in-out infinite;
+}
+
+@keyframes jarAura {
+    0%,
+    100% {
+        transform: scale(0.9);
+        opacity: 0.5;
+    }
+
+    50% {
+        transform: scale(1.08);
+        opacity: 1;
+    }
+}
+
+
+/* =========================================================
+   JAR GLASS
+   ========================================================= */
+
+.memory-jar {
+    position: relative;
+
+    width: 135px;
+    height: 170px;
+}
+
+.jar-glass {
+    position: absolute;
+
+    left: 8px;
+    right: 8px;
+    bottom: 0;
+
+    height: 150px;
+
+    overflow: hidden;
+
+    border-radius:
+        25px
+        25px
+        38px
+        38px;
+
+    border: 1px solid rgba(255, 240, 218, 0.38);
+
+    background:
+        linear-gradient(
+            120deg,
+            rgba(255, 255, 255, 0.13),
+            rgba(255, 255, 255, 0.035) 35%,
+            rgba(255, 220, 190, 0.06)
+        );
+
+    box-shadow:
+        inset 10px 0 20px rgba(255, 255, 255, 0.04),
+        inset -10px 0 20px rgba(0, 0, 0, 0.10),
+        0 15px 45px rgba(0, 0, 0, 0.25);
+
+    backdrop-filter: blur(5px);
+}
+
+.jar-glass::before {
+    content: "";
+
+    position: absolute;
+
+    left: 12px;
+    top: 10px;
+
+    width: 8px;
+    height: 105px;
+
+    border-radius: 50%;
+
+    background: linear-gradient(
+        to bottom,
+        rgba(255, 255, 255, 0.4),
+        rgba(255, 255, 255, 0)
+    );
+
+    filter: blur(1px);
+
+    opacity: 0.45;
+}
+
+
+/* =========================================================
+   JAR LID
+   ========================================================= */
+
+.jar-lid {
+    position: absolute;
+
+    z-index: 5;
+
+    top: 4px;
+    left: 15px;
+
+    width: 105px;
+    height: 28px;
+
+    border-radius: 8px 8px 5px 5px;
+
+    background:
+        linear-gradient(
+            to bottom,
+            #d6b993,
+            #a88966
+        );
+
+    border: 1px solid rgba(255, 225, 190, 0.4);
+
+    box-shadow:
+        0 5px 10px rgba(0, 0, 0, 0.22);
+}
+
+.lid-top {
+    position: absolute;
+
+    left: 9px;
+    right: 9px;
+    top: -6px;
+
+    height: 10px;
+
+    border-radius: 50%;
+
+    background: #e1c29c;
+
+    border: 1px solid rgba(255, 235, 205, 0.35);
+}
+
+
+/* =========================================================
+   JAR SHINE
+   ========================================================= */
+
+.jar-shine {
+    position: absolute;
+
+    top: 18px;
+    right: 18px;
+
+    width: 25px;
+    height: 70px;
+
+    border-radius: 50%;
+
+    background: rgba(255, 255, 255, 0.08);
+
+    transform: rotate(15deg);
+
+    filter: blur(2px);
+}
+
+
+/* =========================================================
+   LITTLE MEMORIES INSIDE
+   ========================================================= */
+
+.memory-star {
+    position: absolute;
+
+    color: #f2d4aa;
+
+    text-shadow:
+        0 0 12px rgba(242, 212, 170, 0.7);
+
+    font-size: 1.2rem;
+}
+
+.star-one {
+    left: 30px;
+    top: 45px;
+}
+
+.star-two {
+    right: 28px;
+    top: 70px;
+
     font-size: 0.9rem;
-  }
-  
-  .access-form input {
-    width: 100%;
-    box-sizing: border-box;
-    padding: 1rem 1.1rem;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 14px;
-    outline: none;
-    background: rgba(0, 0, 0, 0.2);
-    color: #fff;
-    font: inherit;
-  }
-  
-  .access-form input::placeholder {
-    color: rgba(255, 255, 255, 0.4);
-  }
-  
-  .access-form input:focus {
-    border-color: #d9bde9;
-    box-shadow: 0 0 0 3px rgba(217, 189, 233, 0.12);
-  }
-  
-  .access-form button {
-    margin-top: 0.5rem;
-    padding: 1rem;
-    border: none;
-    border-radius: 14px;
-    background: linear-gradient(135deg, #d9bde9, #e9c4a1);
-    color: #241b2d;
-    cursor: pointer;
-    font: inherit;
-    font-weight: 700;
-    transition: transform 0.2s ease, opacity 0.2s ease;
-  }
-  
-  .access-form button:hover {
-    transform: translateY(-2px);
-  }
-  
-  .access-form button:disabled {
-    cursor: wait;
-    opacity: 0.6;
-  }
-  
-  .access-error {
+}
+
+.memory-heart {
+    position: absolute;
+
+    left: 50%;
+    top: 88px;
+
+    transform: translateX(-50%);
+
+    color: #e8b7aa;
+
+    font-family: Georgia, serif;
+
+    font-size: 2rem;
+
+    text-shadow:
+        0 0 15px rgba(232, 183, 170, 0.3);
+}
+
+.paper-memory {
+    position: absolute;
+
+    left: 50%;
+    bottom: 18px;
+
+    transform: translateX(-50%) rotate(-4deg);
+
+    width: 62px;
+    height: 42px;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    color: #594b43;
+
+    background: #e9d7b9;
+
+    font-family: Georgia, serif;
+
+    font-size: 0.62rem;
+
+    line-height: 1.05;
+
+    box-shadow:
+        0 5px 8px rgba(0, 0, 0, 0.15);
+}
+
+
+/* =========================================================
+   HEADING
+   ========================================================= */
+
+.access-heading {
+    margin-top: 0.4rem;
+}
+
+.handwritten {
+    margin: 0 0 0.2rem;
+
+    color: #d9b9a4;
+
+    font-family:
+        "Kalam",
+        "Comic Sans MS",
+        cursive;
+
+    font-size: 1rem;
+
+    transform: rotate(-2deg);
+}
+
+.access-heading h1 {
     margin: 0;
-    color: #ffb4b4;
-    font-size: 0.85rem;
-  }
-  
-  .access-footer {
-    margin: 2rem 0 0;
-    color: rgba(248, 239, 255, 0.45);
-    font-size: 0.8rem;
-  }
+
+    color: #f5e9da;
+
+    font-family:
+        Georgia,
+        "Times New Roman",
+        serif;
+
+    font-size: clamp(2.6rem, 8vw, 4rem);
+
+    font-weight: 400;
+
+    letter-spacing: -0.045em;
+
+    line-height: 0.98;
+
+    text-shadow:
+        0 10px 30px rgba(0, 0, 0, 0.35);
+}
+
+.access-heading h1 span {
+    display: block;
+
+    color: #d9b99d;
+
+    font-style: italic;
+}
+
+.heading-description {
+    margin: 1.2rem 0 1.8rem;
+
+    color: rgba(244, 231, 215, 0.58);
+
+    font-family:
+        "Quicksand",
+        sans-serif;
+
+    font-size: 0.9rem;
+
+    line-height: 1.75;
+}
+
+
+/* =========================================================
+   SECRET FORM
+   ========================================================= */
+
+.secret-form {
+    width: min(100%, 400px);
+}
+
+.secret-label {
+    display: flex;
+
+    align-items: center;
+
+    gap: 0.7rem;
+
+    margin-bottom: 0.8rem;
+
+    color: rgba(232, 213, 192, 0.38);
+
+    font-family:
+        "Courier New",
+        monospace;
+
+    font-size: 0.55rem;
+
+    letter-spacing: 0.16em;
+}
+
+.secret-label .line {
+    flex: 1;
+
+    height: 1px;
+
+    background:
+        linear-gradient(
+            to right,
+            transparent,
+            rgba(232, 213, 192, 0.2)
+        );
+}
+
+.secret-label .line:last-child {
+    transform: rotate(180deg);
+}
+
+
+/* =========================================================
+   KEY BOX
+   ========================================================= */
+
+.key-box {
+    position: relative;
+
+    display: flex;
+    align-items: center;
+
+    height: 58px;
+
+    padding-left: 1.1rem;
+
+    border: 1px solid rgba(238, 218, 195, 0.16);
+
+    border-radius: 17px;
+
+    background:
+        rgba(255, 255, 255, 0.045);
+
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.05),
+        0 15px 40px rgba(0, 0, 0, 0.18);
+
+    backdrop-filter: blur(12px);
+
+    transition:
+        border-color 0.3s ease,
+        box-shadow 0.3s ease,
+        background 0.3s ease;
+}
+
+.key-box:focus-within {
+    border-color: rgba(224, 190, 156, 0.45);
+
+    background:
+        rgba(255, 255, 255, 0.065);
+
+    box-shadow:
+        0 0 0 4px rgba(224, 190, 156, 0.055),
+        0 15px 40px rgba(0, 0, 0, 0.2);
+}
+
+.key-box.has-error {
+    border-color: rgba(226, 143, 143, 0.5);
+
+    animation: errorPulse 0.4s ease;
+}
+
+@keyframes errorPulse {
+    0% {
+        transform: translateX(0);
+    }
+
+    25% {
+        transform: translateX(-3px);
+    }
+
+    50% {
+        transform: translateX(3px);
+    }
+
+    75% {
+        transform: translateX(-2px);
+    }
+
+    100% {
+        transform: translateX(0);
+    }
+}
+
+.key-icon {
+    flex-shrink: 0;
+
+    margin-right: 0.75rem;
+
+    color: #d7b18e;
+
+    font-size: 0.9rem;
+
+    text-shadow:
+        0 0 10px rgba(215, 177, 142, 0.4);
+}
+
+.key-box input {
+    min-width: 0;
+    flex: 1;
+
+    height: 100%;
+
+    padding: 0;
+
+    border: none;
+    outline: none;
+
+    background: transparent;
+
+    color: #f7eadc;
+
+    font-family:
+        "Quicksand",
+        sans-serif;
+
+    font-size: 0.9rem;
+
+    letter-spacing: 0.04em;
+}
+
+.key-box input::placeholder {
+    color: rgba(244, 231, 215, 0.3);
+}
+
+.key-box input:disabled {
+    cursor: wait;
+}
+
+
+/* =========================================================
+   UNLOCK BUTTON
+   ========================================================= */
+
+.key-box button {
+    flex-shrink: 0;
+
+    width: 46px;
+    height: 46px;
+
+    margin-right: 6px;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    border: none;
+    border-radius: 13px;
+
+    background:
+        linear-gradient(
+            135deg,
+            #e4c19c,
+            #c99f83
+        );
+
+    color: #29201c;
+
+    cursor: pointer;
+
+    font-family: Georgia, serif;
+
+    font-size: 1.5rem;
+
+    transition:
+        transform 0.25s ease,
+        box-shadow 0.25s ease,
+        background 0.25s ease;
+}
+
+.key-box button:hover:not(:disabled) {
+    transform: translateX(3px);
+
+    background:
+        linear-gradient(
+            135deg,
+            #efd0a9,
+            #d6aa8b
+        );
+
+    box-shadow:
+        0 5px 20px rgba(218, 176, 140, 0.2);
+}
+
+.key-box button:active:not(:disabled) {
+    transform: translateX(5px) scale(0.96);
+}
+
+.key-box button:disabled {
+    opacity: 0.7;
+
+    cursor: wait;
+}
+
+.unlock-loader {
+    letter-spacing: 0.15em;
+
+    animation: loadingDots 1s ease-in-out infinite;
+}
+
+@keyframes loadingDots {
+    0%,
+    100% {
+        opacity: 0.35;
+    }
+
+    50% {
+        opacity: 1;
+    }
+}
+
+
+/* =========================================================
+   ERROR MESSAGE
+   ========================================================= */
+
+.secret-error {
+    margin: 0.75rem 0 0;
+
+    color: #dca6a0;
+
+    font-family:
+        "Quicksand",
+        sans-serif;
+
+    font-size: 0.76rem;
+
+    letter-spacing: 0.02em;
+}
+
+
+/* =========================================================
+   BOTTOM MESSAGE
+   ========================================================= */
+
+.access-bottom {
+    display: flex;
+
+    align-items: center;
+
+    gap: 0.45rem;
+
+    margin-top: 2.4rem;
+
+    color: rgba(242, 226, 208, 0.28);
+
+    font-family:
+        "Quicksand",
+        sans-serif;
+
+    font-size: 0.68rem;
+
+    letter-spacing: 0.05em;
+}
+
+.tiny-heart {
+    color: #bd8f87;
+
+    font-size: 0.9rem;
+
+    animation: tinyHeart 2.5s ease-in-out infinite;
+}
+
+@keyframes tinyHeart {
+    0%,
+    100% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.2);
+    }
+}
+
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 700px) {
+
+    .access-gate {
+        padding: 1.5rem;
+    }
+
+    .moon {
+        width: 5rem;
+        height: 5rem;
+
+        top: 5%;
+        right: 5%;
+    }
+
+    .access-label {
+        font-size: 0.5rem;
+
+        letter-spacing: 0.2em;
+    }
+
+    .jar-wrapper {
+        transform: scale(0.88);
+
+        margin-top: -0.5rem;
+        margin-bottom: -0.5rem;
+    }
+
+    .access-heading h1 {
+        font-size: clamp(2.4rem, 12vw, 3.4rem);
+    }
+
+    .heading-description {
+        font-size: 0.82rem;
+    }
+
+    .secret-form {
+        width: 100%;
+    }
+
+    .secret-label {
+        font-size: 0.47rem;
+    }
+
+    .access-bottom {
+        font-size: 0.58rem;
+    }
+}
+
+
+@media (max-width: 420px) {
+
+    .access-gate {
+        padding: 1rem;
+    }
+
+    .access-label {
+        margin-bottom: 0.8rem;
+
+        font-size: 0.46rem;
+    }
+
+    .jar-wrapper {
+        transform: scale(0.78);
+
+        margin-top: -1.2rem;
+        margin-bottom: -1.5rem;
+    }
+
+    .access-heading h1 {
+        font-size: 2.35rem;
+    }
+
+    .heading-description {
+        margin-top: 1rem;
+
+        font-size: 0.76rem;
+    }
+
+    .secret-label {
+        gap: 0.4rem;
+
+        letter-spacing: 0.1em;
+    }
+
+    .key-box {
+        height: 54px;
+    }
+
+    .key-box button {
+        width: 42px;
+        height: 42px;
+    }
+
+    .access-bottom {
+        margin-top: 1.7rem;
+
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+}
+
+
+/* =========================================================
+   REDUCED MOTION
+   ========================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+
+    .stars span,
+    .jar-aura,
+    .tiny-heart,
+    .unlock-loader {
+        animation: none;
+    }
+
+    .key-box button {
+        transition: none;
+    }
+}
