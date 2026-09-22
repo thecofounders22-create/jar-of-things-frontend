@@ -498,7 +498,7 @@ function Collection() {
           <p className="tr-intro">
             A quiet line of pegs for the words, memories, and feelings you
             never want to lose.
-            {stats.since && ` Hanging here since ${stats.since}.`}
+            {stats.since && ` Hanging here since 10th May.`}
           </p>
         </motion.section>
 
