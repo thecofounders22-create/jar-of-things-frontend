@@ -1,11 +1,11 @@
 import { BrowserRouter, Routes, Route, useNavigate } from "react-router-dom";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
-  motion,
-  AnimatePresence,
-  useMotionValue,
-  useSpring,
-  useTransform,
+    motion,
+    AnimatePresence,
+    useMotionValue,
+    useSpring,
+    useTransform,
 } from "framer-motion";
 
 import AccessGate from "./pages/AccessGate";
@@ -13,10 +13,10 @@ import Collection from "./pages/Collection";
 import AddNote from "./pages/AddNote";
 
 import {
-  getAllNotes,
-  getCategories,
-  collectNote,
-  getCollectedNotes,
+    getAllNotes,
+    getCategories,
+    collectNote,
+    getCollectedNotes,
 } from "./services/api";
 
 import "./App.css";
@@ -38,86 +38,86 @@ const LONG_NOTE_LENGTH = 220;
 const MAX_STARS = 42;
 
 const PAPER_COLORS = [
-  "#f6d7b0", // apricot
-  "#f3b6a8", // blush
-  "#c9dcc0", // sage
-  "#f1e3a4", // butter
-  "#cfd6ee", // periwinkle
-  "#e9c3d9", // lilac
+    "#f6d7b0", // apricot
+    "#f3b6a8", // blush
+    "#c9dcc0", // sage
+    "#f1e3a4", // butter
+    "#cfd6ee", // periwinkle
+    "#e9c3d9", // lilac
 ];
 
 const JAR_PATH =
-  "M100 70 L200 70 L200 95 C200 112 260 116 260 162 L260 330 C260 355 240 366 214 366 L86 366 C60 366 40 355 40 330 L40 162 C40 116 100 112 100 95 Z";
+    "M100 70 L200 70 L200 95 C200 112 260 116 260 162 L260 330 C260 355 240 366 214 366 L86 366 C60 366 40 355 40 330 L40 162 C40 116 100 112 100 95 Z";
 
 // Tiny deterministic RNG so layouts don't jump between renders.
 function mulberry32(seed) {
-  let a = seed;
-  return function random() {
-    a |= 0;
-    a = (a + 0x6d2b79f5) | 0;
-    let t = Math.imul(a ^ (a >>> 15), 1 | a);
-    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-  };
+    let a = seed;
+    return function random() {
+        a |= 0;
+        a = (a + 0x6d2b79f5) | 0;
+        let t = Math.imul(a ^ (a >>> 15), 1 | a);
+        t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+        return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
 }
 
 function buildStarPath(outer = 12, inner = 6.2) {
-  const points = [];
-  for (let i = 0; i < 10; i += 1) {
-    const radius = i % 2 === 0 ? outer : inner;
-    const angle = (Math.PI / 5) * i - Math.PI / 2;
-    points.push(
-      `${(Math.cos(angle) * radius).toFixed(2)},${(Math.sin(angle) * radius).toFixed(2)}`
-    );
-  }
-  return `M${points.join("L")}Z`;
+    const points = [];
+    for (let i = 0; i < 10; i += 1) {
+        const radius = i % 2 === 0 ? outer : inner;
+        const angle = (Math.PI / 5) * i - Math.PI / 2;
+        points.push(
+            `${(Math.cos(angle) * radius).toFixed(2)},${(Math.sin(angle) * radius).toFixed(2)}`
+        );
+    }
+    return `M${points.join("L")}Z`;
 }
 
 const STAR_PATH = buildStarPath();
 
 // Stars settle into a loose pile at the bottom of the jar.
 function pileLayout(count, seed = 7) {
-  const random = mulberry32(seed);
-  const perRow = 6;
+    const random = mulberry32(seed);
+    const perRow = 6;
 
-  return Array.from({ length: count }, (_, i) => {
-    const row = Math.floor(i / perRow);
-    const col = i % perRow;
-    const offset = row % 2 ? 14 : 0;
+    return Array.from({ length: count }, (_, i) => {
+        const row = Math.floor(i / perRow);
+        const col = i % perRow;
+        const offset = row % 2 ? 14 : 0;
 
-    return {
-      x: 72 + col * 29 + offset + (random() - 0.5) * 8,
-      y: 338 - row * 25 + (random() - 0.5) * 6,
-      rotate: (random() - 0.5) * 70,
-      float: random(),
-    };
-  });
+        return {
+            x: 72 + col * 29 + offset + (random() - 0.5) * 8,
+            y: 338 - row * 25 + (random() - 0.5) * 6,
+            rotate: (random() - 0.5) * 70,
+            float: random(),
+        };
+    });
 }
 
 const paperFor = (note, index) => {
-  const key = Number(note?.id);
-  const seed = Number.isFinite(key) ? Math.abs(key) : index;
-  return PAPER_COLORS[seed % PAPER_COLORS.length];
+    const key = Number(note?.id);
+    const seed = Number.isFinite(key) ? Math.abs(key) : index;
+    return PAPER_COLORS[seed % PAPER_COLORS.length];
 };
 
 const pad = (n) => String(n).padStart(2, "0");
 
 const formatDate = (value) => {
-  if (!value) return null;
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return null;
-  return date.toLocaleDateString(undefined, {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-  });
+    if (!value) return null;
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return null;
+    return date.toLocaleDateString(undefined, {
+        day: "numeric",
+        month: "short",
+        year: "numeric",
+    });
 };
 
 const extractNoteId = (entry) => {
-  if (entry?.note?.id !== undefined) return Number(entry.note.id);
-  if (entry?.noteId !== undefined) return Number(entry.noteId);
-  if (entry?.note?.noteId !== undefined) return Number(entry.note.noteId);
-  return null;
+    if (entry?.note?.id !== undefined) return Number(entry.note.id);
+    if (entry?.noteId !== undefined) return Number(entry.noteId);
+    if (entry?.note?.noteId !== undefined) return Number(entry.note.noteId);
+    return null;
 };
 
 // ---------------------------------------------------------------------
@@ -125,78 +125,78 @@ const extractNoteId = (entry) => {
 // ---------------------------------------------------------------------
 
 function useJarData(userId) {
-  const [notes, setNotes] = useState([]);
-  const [categories, setCategories] = useState([]);
-  const [keptIds, setKeptIds] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+    const [notes, setNotes] = useState([]);
+    const [categories, setCategories] = useState([]);
+    const [keptIds, setKeptIds] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState("");
 
-  const load = useCallback(async () => {
-    try {
-      setLoading(true);
-      setError("");
+    const load = useCallback(async () => {
+        try {
+            setLoading(true);
+            setError("");
 
-      const [notesResponse, categoryResponse] = await Promise.all([
-        getAllNotes(),
-        getCategories(),
-      ]);
+            const [notesResponse, categoryResponse] = await Promise.all([
+                getAllNotes(),
+                getCategories(),
+            ]);
 
-      setNotes(Array.isArray(notesResponse.data) ? notesResponse.data : []);
-      setCategories(
-        Array.isArray(categoryResponse.data) ? categoryResponse.data : []
-      );
+            setNotes(Array.isArray(notesResponse.data) ? notesResponse.data : []);
+            setCategories(
+                Array.isArray(categoryResponse.data) ? categoryResponse.data : []
+            );
 
-      try {
-        const collectedResponse = await getCollectedNotes(userId);
-        const collections = Array.isArray(collectedResponse.data)
-          ? collectedResponse.data
-          : [];
+            try {
+                const collectedResponse = await getCollectedNotes(userId);
+                const collections = Array.isArray(collectedResponse.data)
+                    ? collectedResponse.data
+                    : [];
 
-        setKeptIds(
-          collections
-            .map(extractNoteId)
-            .filter((id) => id !== null && !Number.isNaN(id))
-        );
-      } catch (collectionError) {
-        console.error("Could not load collected notes:", collectionError);
-        setKeptIds([]);
-      }
-    } catch (err) {
-      console.error("Could not load jar data:", err);
-      setError("The jar didn't open. Check your connection and try again.");
-    } finally {
-      setLoading(false);
-    }
-  }, [userId]);
+                setKeptIds(
+                    collections
+                        .map(extractNoteId)
+                        .filter((id) => id !== null && !Number.isNaN(id))
+                );
+            } catch (collectionError) {
+                console.error("Could not load collected notes:", collectionError);
+                setKeptIds([]);
+            }
+        } catch (err) {
+            console.error("Could not load jar data:", err);
+            setError("The jar didn't open. Check your connection and try again.");
+        } finally {
+            setLoading(false);
+        }
+    }, [userId]);
 
-  useEffect(() => {
-    load();
-  }, [load]);
+    useEffect(() => {
+        load();
+    }, [load]);
 
-  return { notes, categories, keptIds, setKeptIds, loading, error, reload: load };
+    return { notes, categories, keptIds, setKeptIds, loading, error, reload: load };
 }
 
 function useTilt(range = 6) {
-  const pointerX = useMotionValue(0);
-  const pointerY = useMotionValue(0);
-  const springX = useSpring(pointerX, { stiffness: 150, damping: 20 });
-  const springY = useSpring(pointerY, { stiffness: 150, damping: 20 });
+    const pointerX = useMotionValue(0);
+    const pointerY = useMotionValue(0);
+    const springX = useSpring(pointerX, { stiffness: 150, damping: 20 });
+    const springY = useSpring(pointerY, { stiffness: 150, damping: 20 });
 
-  const rotateX = useTransform(springY, [-1, 1], [range, -range]);
-  const rotateY = useTransform(springX, [-1, 1], [-range, range]);
+    const rotateX = useTransform(springY, [-1, 1], [range, -range]);
+    const rotateY = useTransform(springX, [-1, 1], [-range, range]);
 
-  const onMouseMove = (event) => {
-    const box = event.currentTarget.getBoundingClientRect();
-    pointerX.set(((event.clientX - box.left) / box.width) * 2 - 1);
-    pointerY.set(((event.clientY - box.top) / box.height) * 2 - 1);
-  };
+    const onMouseMove = (event) => {
+        const box = event.currentTarget.getBoundingClientRect();
+        pointerX.set(((event.clientX - box.left) / box.width) * 2 - 1);
+        pointerY.set(((event.clientY - box.top) / box.height) * 2 - 1);
+    };
 
-  const reset = useCallback(() => {
-    pointerX.set(0);
-    pointerY.set(0);
-  }, [pointerX, pointerY]);
+    const reset = useCallback(() => {
+        pointerX.set(0);
+        pointerY.set(0);
+    }, [pointerX, pointerY]);
 
-  return { rotateX, rotateY, onMouseMove, onMouseLeave: reset, reset };
+    return { rotateX, rotateY, onMouseMove, onMouseLeave: reset, reset };
 }
 
 // ---------------------------------------------------------------------
@@ -204,266 +204,266 @@ function useTilt(range = 6) {
 // ---------------------------------------------------------------------
 
 function NightSky({ count = 70 }) {
-  const dots = useMemo(() => {
-    const random = mulberry32(42);
-    return Array.from({ length: count }, () => ({
-      left: random() * 100,
-      top: random() * 75,
-      size: random() * 2 + 1,
-      delay: random() * 4,
-      duration: 2.5 + random() * 3,
-    }));
-  }, [count]);
+    const dots = useMemo(() => {
+        const random = mulberry32(42);
+        return Array.from({ length: count }, () => ({
+            left: random() * 100,
+            top: random() * 75,
+            size: random() * 2 + 1,
+            delay: random() * 4,
+            duration: 2.5 + random() * 3,
+        }));
+    }, [count]);
 
-  return (
-    <div className="lj-sky" aria-hidden="true">
-      {dots.map((dot, i) => (
-        <span
-          key={i}
-          style={{
-            left: `${dot.left}%`,
-            top: `${dot.top}%`,
-            width: dot.size,
-            height: dot.size,
-            animationDelay: `${dot.delay}s`,
-            animationDuration: `${dot.duration}s`,
-          }}
-        />
-      ))}
-    </div>
-  );
+    return (
+        <div className="lj-sky" aria-hidden="true">
+            {dots.map((dot, i) => (
+                <span
+                    key={i}
+                    style={{
+                        left: `${dot.left}%`,
+                        top: `${dot.top}%`,
+                        width: dot.size,
+                        height: dot.size,
+                        animationDelay: `${dot.delay}s`,
+                        animationDuration: `${dot.duration}s`,
+                    }}
+                />
+            ))}
+        </div>
+    );
 }
 
 function PaperStar({ item, position, active, mode, onPick, index }) {
-  const opening = mode === "opening";
-  const pickable = Boolean(onPick);
+    const opening = mode === "opening";
+    const pickable = Boolean(onPick);
 
-  const handleKey = (event) => {
-    if (event.key === "Enter" || event.key === " ") {
-      event.preventDefault();
-      onPick(index);
-    }
-  };
+    const handleKey = (event) => {
+        if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            onPick(index);
+        }
+    };
 
-  return (
-    <g transform={`translate(${position.x} ${position.y})`}>
-      <motion.g
-        className={`lj-star${active ? " is-active" : ""}${
-          pickable ? " is-pickable" : ""
-        }`}
-        initial={false}
-        animate={
-          opening
-            ? {
-                x: (position.x - 150) * 0.9,
-                y: -380 - position.float * 140,
-                rotate: position.rotate + 280,
-                opacity: 0,
-                scale: 0.6,
-              }
-            : {
-                x: 0,
-                y: active ? -6 : 0,
-                rotate: position.rotate,
-                opacity: 1,
-                scale: active ? 1.35 : 1,
-              }
-        }
-        transition={
-          opening
-            ? { duration: 0.9, delay: position.float * 0.25, ease: [0.2, 0.7, 0.3, 1] }
-            : { type: "spring", stiffness: 260, damping: 18 }
-        }
-        whileHover={pickable ? { scale: active ? 1.42 : 1.22 } : undefined}
-        onClick={pickable ? () => onPick(index) : undefined}
-        onKeyDown={pickable ? handleKey : undefined}
-        role={pickable ? "button" : undefined}
-        tabIndex={pickable ? 0 : undefined}
-        aria-label={pickable ? `Unfold note ${index + 1}` : undefined}
-        aria-pressed={pickable ? active : undefined}
-      >
-        <path
-          d={STAR_PATH}
-          fill={item.color}
-          stroke={item.color}
-          strokeWidth="5"
-          strokeLinejoin="round"
-        />
-        <path
-          d={STAR_PATH}
-          fill="none"
-          stroke="rgba(80, 50, 30, 0.28)"
-          strokeWidth="0.9"
-          transform="scale(0.55)"
-        />
-        {item.kept && <circle r="2.4" fill="#b94536" />}
-      </motion.g>
-    </g>
-  );
+    return (
+        <g transform={`translate(${position.x} ${position.y})`}>
+            <motion.g
+                className={`lj-star${active ? " is-active" : ""}${
+                    pickable ? " is-pickable" : ""
+                }`}
+                initial={false}
+                animate={
+                    opening
+                        ? {
+                            x: (position.x - 150) * 0.9,
+                            y: -380 - position.float * 140,
+                            rotate: position.rotate + 280,
+                            opacity: 0,
+                            scale: 0.6,
+                        }
+                        : {
+                            x: 0,
+                            y: active ? -6 : 0,
+                            rotate: position.rotate,
+                            opacity: 1,
+                            scale: active ? 1.35 : 1,
+                        }
+                }
+                transition={
+                    opening
+                        ? { duration: 0.9, delay: position.float * 0.25, ease: [0.2, 0.7, 0.3, 1] }
+                        : { type: "spring", stiffness: 260, damping: 18 }
+                }
+                whileHover={pickable ? { scale: active ? 1.42 : 1.22 } : undefined}
+                onClick={pickable ? () => onPick(index) : undefined}
+                onKeyDown={pickable ? handleKey : undefined}
+                role={pickable ? "button" : undefined}
+                tabIndex={pickable ? 0 : undefined}
+                aria-label={pickable ? `Unfold note ${index + 1}` : undefined}
+                aria-pressed={pickable ? active : undefined}
+            >
+                <path
+                    d={STAR_PATH}
+                    fill={item.color}
+                    stroke={item.color}
+                    strokeWidth="5"
+                    strokeLinejoin="round"
+                />
+                <path
+                    d={STAR_PATH}
+                    fill="none"
+                    stroke="rgba(80, 50, 30, 0.28)"
+                    strokeWidth="0.9"
+                    transform="scale(0.55)"
+                />
+                {item.kept && <circle r="2.4" fill="#b94536" />}
+            </motion.g>
+        </g>
+    );
 }
 
 function GlassJar({ items, activeId, onPick, mode = "idle", tag, label }) {
-  const layout = useMemo(() => pileLayout(items.length), [items.length]);
-  const opening = mode === "opening";
+    const layout = useMemo(() => pileLayout(items.length), [items.length]);
+    const opening = mode === "opening";
 
-  return (
-    <svg
-      className="lj-jar-svg"
-      viewBox="0 0 300 390"
-      role={onPick ? "group" : "img"}
-      aria-label={label}
-    >
-      <defs>
-        <linearGradient id="lj-glass" x1="0" x2="1">
-          <stop offset="0" stopColor="#ffffff" stopOpacity="0.16" />
-          <stop offset="0.45" stopColor="#ffffff" stopOpacity="0.03" />
-          <stop offset="1" stopColor="#ffffff" stopOpacity="0.12" />
-        </linearGradient>
-        <radialGradient id="lj-inner-glow" cx="0.5" cy="0.78" r="0.65">
-          <stop offset="0" stopColor="#ffc978" stopOpacity="0.4" />
-          <stop offset="1" stopColor="#ffc978" stopOpacity="0" />
-        </radialGradient>
-        <linearGradient id="lj-lid" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stopColor="#ecc176" />
-          <stop offset="1" stopColor="#9c6a2c" />
-        </linearGradient>
-      </defs>
+    return (
+        <svg
+            className="lj-jar-svg"
+            viewBox="0 0 300 390"
+            role={onPick ? "group" : "img"}
+            aria-label={label}
+        >
+            <defs>
+                <linearGradient id="lj-glass" x1="0" x2="1">
+                    <stop offset="0" stopColor="#ffffff" stopOpacity="0.16" />
+                    <stop offset="0.45" stopColor="#ffffff" stopOpacity="0.03" />
+                    <stop offset="1" stopColor="#ffffff" stopOpacity="0.12" />
+                </linearGradient>
+                <radialGradient id="lj-inner-glow" cx="0.5" cy="0.78" r="0.65">
+                    <stop offset="0" stopColor="#ffc978" stopOpacity="0.4" />
+                    <stop offset="1" stopColor="#ffc978" stopOpacity="0" />
+                </radialGradient>
+                <linearGradient id="lj-lid" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0" stopColor="#ecc176" />
+                    <stop offset="1" stopColor="#9c6a2c" />
+                </linearGradient>
+            </defs>
 
-      <ellipse className="lj-jar-shadow" cx="150" cy="372" rx="118" ry="9" />
+            <ellipse className="lj-jar-shadow" cx="150" cy="372" rx="118" ry="9" />
 
-      {/* warm glow living inside the glass */}
-      <path d={JAR_PATH} fill="url(#lj-inner-glow)" />
+            {/* warm glow living inside the glass */}
+            <path d={JAR_PATH} fill="url(#lj-inner-glow)" />
 
-      {items.map((item, i) => (
-        <PaperStar
-          key={item.id}
-          item={item}
-          index={i}
-          position={layout[i]}
-          active={item.id === activeId}
-          mode={mode}
-          onPick={onPick}
-        />
-      ))}
+            {items.map((item, i) => (
+                <PaperStar
+                    key={item.id}
+                    item={item}
+                    index={i}
+                    position={layout[i]}
+                    active={item.id === activeId}
+                    mode={mode}
+                    onPick={onPick}
+                />
+            ))}
 
-      {/* glass body + highlights */}
-      <path
-        d={JAR_PATH}
-        fill="url(#lj-glass)"
-        stroke="rgba(255,255,255,0.55)"
-        strokeWidth="2.5"
-        pointerEvents="none"
-      />
-      <path
-        d="M62 172 C57 222 57 292 66 336"
-        stroke="#ffffff"
-        strokeOpacity="0.35"
-        strokeWidth="6"
-        strokeLinecap="round"
-        fill="none"
-        pointerEvents="none"
-      />
-      <path
-        d="M242 190 C245 230 245 270 241 300"
-        stroke="#ffffff"
-        strokeOpacity="0.15"
-        strokeWidth="3"
-        strokeLinecap="round"
-        fill="none"
-        pointerEvents="none"
-      />
+            {/* glass body + highlights */}
+            <path
+                d={JAR_PATH}
+                fill="url(#lj-glass)"
+                stroke="rgba(255,255,255,0.55)"
+                strokeWidth="2.5"
+                pointerEvents="none"
+            />
+            <path
+                d="M62 172 C57 222 57 292 66 336"
+                stroke="#ffffff"
+                strokeOpacity="0.35"
+                strokeWidth="6"
+                strokeLinecap="round"
+                fill="none"
+                pointerEvents="none"
+            />
+            <path
+                d="M242 190 C245 230 245 270 241 300"
+                stroke="#ffffff"
+                strokeOpacity="0.15"
+                strokeWidth="3"
+                strokeLinecap="round"
+                fill="none"
+                pointerEvents="none"
+            />
 
-      {/* brass lid */}
-      <motion.g
-        initial={false}
-        animate={
-          opening
-            ? { y: -170, x: 50, rotate: 210, opacity: 0 }
-            : { y: 0, x: 0, rotate: 0, opacity: 1 }
-        }
-        transition={{ duration: 0.7, ease: "easeIn" }}
-      >
-        <rect x="92" y="40" width="116" height="32" rx="7" fill="url(#lj-lid)" />
-        {Array.from({ length: 7 }, (_, k) => (
-          <line
-            key={k}
-            x1={102 + k * 16}
-            x2={102 + k * 16}
-            y1="45"
-            y2="67"
-            stroke="rgba(90,55,20,0.35)"
-            strokeWidth="2"
-          />
-        ))}
-        <rect x="86" y="66" width="128" height="9" rx="4.5" fill="#7a4f1f" />
-      </motion.g>
-
-      {/* paper tag tied around the neck */}
-      {tag && (
-        <g pointerEvents="none">
-          <path
-            d="M200 86 C216 92 226 106 230.8 124"
-            stroke="#d9c7a3"
-            strokeWidth="1.5"
-            fill="none"
-          />
-          <g transform="translate(222 108) rotate(12)">
-            <path d="M0 14 L10 0 L66 0 L66 28 L10 28 Z" fill="#f5ecd9" />
-            <circle cx="12" cy="14" r="2.6" fill="#15131f" />
-            <text
-              x="39"
-              y="19"
-              textAnchor="middle"
-              fontFamily="Caveat, cursive"
-              fontSize="14"
-              fill="#3a2f3f"
+            {/* brass lid */}
+            <motion.g
+                initial={false}
+                animate={
+                    opening
+                        ? { y: -170, x: 50, rotate: 210, opacity: 0 }
+                        : { y: 0, x: 0, rotate: 0, opacity: 1 }
+                }
+                transition={{ duration: 0.7, ease: "easeIn" }}
             >
-              {tag}
-            </text>
-          </g>
-        </g>
-      )}
-    </svg>
-  );
+                <rect x="92" y="40" width="116" height="32" rx="7" fill="url(#lj-lid)" />
+                {Array.from({ length: 7 }, (_, k) => (
+                    <line
+                        key={k}
+                        x1={102 + k * 16}
+                        x2={102 + k * 16}
+                        y1="45"
+                        y2="67"
+                        stroke="rgba(90,55,20,0.35)"
+                        strokeWidth="2"
+                    />
+                ))}
+                <rect x="86" y="66" width="128" height="9" rx="4.5" fill="#7a4f1f" />
+            </motion.g>
+
+            {/* paper tag tied around the neck */}
+            {tag && (
+                <g pointerEvents="none">
+                    <path
+                        d="M200 86 C216 92 226 106 230.8 124"
+                        stroke="#d9c7a3"
+                        strokeWidth="1.5"
+                        fill="none"
+                    />
+                    <g transform="translate(222 108) rotate(12)">
+                        <path d="M0 14 L10 0 L66 0 L66 28 L10 28 Z" fill="#f5ecd9" />
+                        <circle cx="12" cy="14" r="2.6" fill="#15131f" />
+                        <text
+                            x="39"
+                            y="19"
+                            textAnchor="middle"
+                            fontFamily="Caveat, cursive"
+                            fontSize="14"
+                            fill="#3a2f3f"
+                        >
+                            {tag}
+                        </text>
+                    </g>
+                </g>
+            )}
+        </svg>
+    );
 }
 
 function StampButton({ kept, busy, onClick }) {
-  return (
-    <button
-      className={`lj-stamp${kept ? " is-kept" : ""}`}
-      onClick={onClick}
-      disabled={busy || kept}
-      title={kept ? "Already kept" : "Keep this note"}
-    >
+    return (
+        <button
+            className={`lj-stamp${kept ? " is-kept" : ""}`}
+            onClick={onClick}
+            disabled={busy || kept}
+            title={kept ? "Already kept" : "Keep this note"}
+        >
       <span className="lj-stamp-paper">
         <span className="lj-stamp-face">
           <span className="lj-stamp-icon">{busy ? "…" : kept ? "✓" : "♡"}</span>
           <span className="lj-stamp-word">{kept ? "Kept" : "Keep"}</span>
         </span>
       </span>
-    </button>
-  );
+        </button>
+    );
 }
 
 function SpinningStar() {
-  return (
-    <motion.svg
-      width="34"
-      height="34"
-      viewBox="-16 -16 32 32"
-      animate={{ rotate: 360 }}
-      transition={{ duration: 2.4, repeat: Infinity, ease: "linear" }}
-      aria-hidden="true"
-    >
-      <path
-        d={STAR_PATH}
-        fill="#f3b660"
-        stroke="#f3b660"
-        strokeWidth="4"
-        strokeLinejoin="round"
-      />
-    </motion.svg>
-  );
+    return (
+        <motion.svg
+            width="34"
+            height="34"
+            viewBox="-16 -16 32 32"
+            animate={{ rotate: 360 }}
+            transition={{ duration: 2.4, repeat: Infinity, ease: "linear" }}
+            aria-hidden="true"
+        >
+            <path
+                d={STAR_PATH}
+                fill="#f3b660"
+                stroke="#f3b660"
+                strokeWidth="4"
+                strokeLinejoin="round"
+            />
+        </motion.svg>
+    );
 }
 
 // ---------------------------------------------------------------------
@@ -471,102 +471,102 @@ function SpinningStar() {
 // ---------------------------------------------------------------------
 
 function Welcome() {
-  const navigate = useNavigate();
-  const [opening, setOpening] = useState(false);
+    const navigate = useNavigate();
+    const [opening, setOpening] = useState(false);
 
-  const demoStars = useMemo(
-    () =>
-      Array.from({ length: 20 }, (_, i) => ({
-        id: `demo-${i}`,
-        color: PAPER_COLORS[i % PAPER_COLORS.length],
-      })),
-    []
-  );
+    const demoStars = useMemo(
+        () =>
+            Array.from({ length: 20 }, (_, i) => ({
+                id: `demo-${i}`,
+                color: PAPER_COLORS[i % PAPER_COLORS.length],
+            })),
+        []
+    );
 
-  const openJar = () => {
-    if (opening) return;
-    setOpening(true);
-    setTimeout(() => navigate("/jar"), 1100);
-  };
+    const openJar = () => {
+        if (opening) return;
+        setOpening(true);
+        setTimeout(() => navigate("/jar"), 1100);
+    };
 
-  return (
-    <main className="lj-scene lj-welcome">
-      <NightSky />
-      <div className="lj-lamp" aria-hidden="true" />
+    return (
+        <main className="lj-scene lj-welcome">
+            <NightSky />
+            <div className="lj-lamp" aria-hidden="true" />
 
-      <div className="lj-welcome-grid">
-        <motion.div
-          className="lj-welcome-copy"
-          initial={{ opacity: 0, y: 24 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1, ease: "easeOut" }}
-        >
-          <p className="lj-kicker">a keeping place for</p>
+            <div className="lj-welcome-grid">
+                <motion.div
+                    className="lj-welcome-copy"
+                    initial={{ opacity: 0, y: 24 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 1, ease: "easeOut" }}
+                >
+                    <p className="lj-kicker">a keeping place for</p>
 
-          <h1 className="lj-title">
-            The Jar of <em>Little Things</em>
-          </h1>
+                    <h1 className="lj-title">
+                        The Jar of <em>Little Things</em>
+                    </h1>
 
-          <p className="lj-lede">
-            Fold up the tiny moments — a joke that landed, a shade of sky, a
-            name you don't want to forget — and drop them in. Come back
-            whenever you need something small and true.
-          </p>
+                    <p className="lj-lede">
+                        Fold up the tiny moments — a joke that landed, a shade of sky, a
+                        name you don't want to forget — and drop them in. Come back
+                        whenever you need something small and true.
+                    </p>
 
-          <button
-            className="lj-btn lj-btn-primary"
-            onClick={openJar}
-            disabled={opening}
-          >
-            {opening ? "Unscrewing the lid…" : "Unscrew the lid"}
-          </button>
+                    <button
+                        className="lj-btn lj-btn-primary"
+                        onClick={openJar}
+                        disabled={opening}
+                    >
+                        {opening ? "Unscrewing the lid…" : "Unscrew the lid"}
+                    </button>
 
-          <p className="lj-footnote">filled by hand, one note at a time</p>
-        </motion.div>
+                    <p className="lj-footnote">filled by hand, one note at a time</p>
+                </motion.div>
 
-        <motion.div
-          className="lj-jar-stage"
-          initial={{ opacity: 0, scale: 0.94 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 1.1, ease: "easeOut", delay: 0.15 }}
-        >
-          <motion.div
-            className="lj-welcome-jar"
-            animate={
-              opening
-                ? { y: -14, scale: 1.05, rotate: [0, -4, 4, 0] }
-                : { y: [0, -10, 0] }
-            }
-            transition={
-              opening
-                ? { duration: 0.5, ease: "easeOut" }
-                : { duration: 6, repeat: Infinity, ease: "easeInOut" }
-            }
-          >
-            <GlassJar
-              items={demoStars}
-              mode={opening ? "opening" : "idle"}
-              tag="little things"
-              label="A glass jar full of folded paper stars"
+                <motion.div
+                    className="lj-jar-stage"
+                    initial={{ opacity: 0, scale: 0.94 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 1.1, ease: "easeOut", delay: 0.15 }}
+                >
+                    <motion.div
+                        className="lj-welcome-jar"
+                        animate={
+                            opening
+                                ? { y: -14, scale: 1.05, rotate: [0, -4, 4, 0] }
+                                : { y: [0, -10, 0] }
+                        }
+                        transition={
+                            opening
+                                ? { duration: 0.5, ease: "easeOut" }
+                                : { duration: 6, repeat: Infinity, ease: "easeInOut" }
+                        }
+                    >
+                        <GlassJar
+                            items={demoStars}
+                            mode={opening ? "opening" : "idle"}
+                            tag="little things"
+                            label="A glass jar full of folded paper stars"
+                        />
+                    </motion.div>
+                    <div className="lj-shelf" aria-hidden="true" />
+                </motion.div>
+            </div>
+
+            <motion.div
+                className="lj-flood"
+                initial={false}
+                animate={
+                    opening
+                        ? { opacity: [0, 0, 1], scale: [0.2, 0.2, 3] }
+                        : { opacity: 0, scale: 0.2 }
+                }
+                transition={{ duration: 1.1, times: [0, 0.45, 1] }}
+                aria-hidden="true"
             />
-          </motion.div>
-          <div className="lj-shelf" aria-hidden="true" />
-        </motion.div>
-      </div>
-
-      <motion.div
-        className="lj-flood"
-        initial={false}
-        animate={
-          opening
-            ? { opacity: [0, 0, 1], scale: [0.2, 0.2, 3] }
-            : { opacity: 0, scale: 0.2 }
-        }
-        transition={{ duration: 1.1, times: [0, 0.45, 1] }}
-        aria-hidden="true"
-      />
-    </main>
-  );
+        </main>
+    );
 }
 
 // ---------------------------------------------------------------------
@@ -574,459 +574,459 @@ function Welcome() {
 // ---------------------------------------------------------------------
 
 function NoteLetter({ note, index, total, isKept, collecting, onKeep, onExpand }) {
-  const isLong = Boolean(note.content && note.content.length > LONG_NOTE_LENGTH);
-  const date = formatDate(note.createdAt);
+    const isLong = Boolean(note.content && note.content.length > LONG_NOTE_LENGTH);
+    const date = formatDate(note.createdAt);
 
-  return (
-    <motion.article
-      key={note.id}
-      className="lj-letter"
-      style={{ "--paper": paperFor(note, index) }}
-      initial={{ opacity: 0, rotateX: -75, y: -24 }}
-      animate={{ opacity: 1, rotateX: 0, y: 0 }}
-      exit={{ opacity: 0, y: 24, rotate: 3, transition: { duration: 0.2 } }}
-      transition={{ type: "spring", stiffness: 120, damping: 16 }}
-    >
-      <div className="lj-letter-head">
+    return (
+        <motion.article
+            key={note.id}
+            className="lj-letter"
+            style={{ "--paper": paperFor(note, index) }}
+            initial={{ opacity: 0, rotateX: -75, y: -24 }}
+            animate={{ opacity: 1, rotateX: 0, y: 0 }}
+            exit={{ opacity: 0, y: 24, rotate: 3, transition: { duration: 0.2 } }}
+            transition={{ type: "spring", stiffness: 120, damping: 16 }}
+        >
+            <div className="lj-letter-head">
         <span className="lj-letter-no">
           No. {pad(index + 1)} / {pad(total)}
         </span>
-        {date && <span>{date}</span>}
-      </div>
-
-      <p className={`lj-letter-body${isLong ? " is-clamped" : ""}`}>
-        {note.content}
-      </p>
-
-      {isLong && (
-        <button className="lj-read-more" onClick={onExpand}>
-          unfold the rest →
-        </button>
-      )}
-
-      {note.imageUrl && (
-        <figure className="lj-polaroid">
-          <img src={note.imageUrl} alt="Memory attached to this note" />
-        </figure>
-      )}
-
-      <footer className="lj-letter-foot">
-        {note.category ? (
-          <span className="lj-label">{note.category.name}</span>
-        ) : (
-          <span />
-        )}
-        <StampButton kept={isKept} busy={collecting} onClick={onKeep} />
-      </footer>
-    </motion.article>
-  );
-}
-
-function LetterModal({ note, index, onClose }) {
-  return (
-    <AnimatePresence>
-      {note && (
-        <motion.div
-          className="lj-backdrop"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.25 }}
-          onClick={onClose}
-        >
-          <motion.article
-            className="lj-letter lj-modal"
-            style={{ "--paper": paperFor(note, index) }}
-            initial={{ opacity: 0, y: 40, scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 20, scale: 0.97 }}
-            transition={{ type: "spring", stiffness: 170, damping: 20 }}
-            onClick={(event) => event.stopPropagation()}
-            role="dialog"
-            aria-modal="true"
-          >
-            <button
-              className="lj-close"
-              onClick={onClose}
-              aria-label="Fold the note back up"
-            >
-              ✕
-            </button>
-
-            <div className="lj-letter-head">
-              <span className="lj-letter-no">No. {pad(index + 1)}</span>
+                {date && <span>{date}</span>}
             </div>
 
-            <p className="lj-letter-body">{note.content}</p>
+            <p className={`lj-letter-body${isLong ? " is-clamped" : ""}`}>
+                {note.content}
+            </p>
+
+            {isLong && (
+                <button className="lj-read-more" onClick={onExpand}>
+                    unfold the rest →
+                </button>
+            )}
 
             {note.imageUrl && (
-              <figure className="lj-polaroid">
-                <img src={note.imageUrl} alt="Memory attached to this note" />
-              </figure>
+                <figure className="lj-polaroid">
+                    <img src={note.imageUrl} alt="Memory attached to this note" />
+                </figure>
             )}
 
             <footer className="lj-letter-foot">
-              {note.category ? (
-                <span className="lj-label">{note.category.name}</span>
-              ) : (
-                <span />
-              )}
-              <span className="lj-signoff">— from the jar</span>
+                {note.category ? (
+                    <span className="lj-label">{note.category.name}</span>
+                ) : (
+                    <span />
+                )}
+                <StampButton kept={isKept} busy={collecting} onClick={onKeep} />
             </footer>
-          </motion.article>
-        </motion.div>
-      )}
-    </AnimatePresence>
-  );
+        </motion.article>
+    );
+}
+
+function LetterModal({ note, index, onClose }) {
+    return (
+        <AnimatePresence>
+            {note && (
+                <motion.div
+                    className="lj-backdrop"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.25 }}
+                    onClick={onClose}
+                >
+                    <motion.article
+                        className="lj-letter lj-modal"
+                        style={{ "--paper": paperFor(note, index) }}
+                        initial={{ opacity: 0, y: 40, scale: 0.95 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, y: 20, scale: 0.97 }}
+                        transition={{ type: "spring", stiffness: 170, damping: 20 }}
+                        onClick={(event) => event.stopPropagation()}
+                        role="dialog"
+                        aria-modal="true"
+                    >
+                        <button
+                            className="lj-close"
+                            onClick={onClose}
+                            aria-label="Fold the note back up"
+                        >
+                            ✕
+                        </button>
+
+                        <div className="lj-letter-head">
+                            <span className="lj-letter-no">No. {pad(index + 1)}</span>
+                        </div>
+
+                        <p className="lj-letter-body">{note.content}</p>
+
+                        {note.imageUrl && (
+                            <figure className="lj-polaroid">
+                                <img src={note.imageUrl} alt="Memory attached to this note" />
+                            </figure>
+                        )}
+
+                        <footer className="lj-letter-foot">
+                            {note.category ? (
+                                <span className="lj-label">{note.category.name}</span>
+                            ) : (
+                                <span />
+                            )}
+                            <span className="lj-signoff">— from the jar</span>
+                        </footer>
+                    </motion.article>
+                </motion.div>
+            )}
+        </AnimatePresence>
+    );
 }
 
 function JarRoom() {
-  const navigate = useNavigate();
-  const { notes, categories, keptIds, setKeptIds, loading, error, reload } =
-    useJarData(USER_ID);
+    const navigate = useNavigate();
+    const { notes, categories, keptIds, setKeptIds, loading, error, reload } =
+        useJarData(USER_ID);
 
-  const [filter, setFilter] = useState("all");
-  const [index, setIndex] = useState(0);
-  const [expanded, setExpanded] = useState(false);
-  const [drawing, setDrawing] = useState(false);
-  const [collecting, setCollecting] = useState(false);
-  const [message, setMessage] = useState("");
+    const [filter, setFilter] = useState("all");
+    const [index, setIndex] = useState(0);
+    const [expanded, setExpanded] = useState(false);
+    const [drawing, setDrawing] = useState(false);
+    const [collecting, setCollecting] = useState(false);
+    const [message, setMessage] = useState("");
 
-  const tilt = useTilt();
+    const tilt = useTilt();
 
-  const visibleNotes = useMemo(
-    () =>
-      filter === "all"
-        ? notes
-        : notes.filter((note) => String(note.category?.id) === String(filter)),
-    [notes, filter]
-  );
+    const visibleNotes = useMemo(
+        () =>
+            filter === "all"
+                ? notes
+                : notes.filter((note) => String(note.category?.id) === String(filter)),
+        [notes, filter]
+    );
 
-  const currentNote = visibleNotes[index];
-  const isKept = Boolean(currentNote && keptIds.includes(Number(currentNote.id)));
+    const currentNote = visibleNotes[index];
+    const isKept = Boolean(currentNote && keptIds.includes(Number(currentNote.id)));
 
-  const jarItems = useMemo(
-    () =>
-      visibleNotes.slice(0, MAX_STARS).map((note, i) => ({
-        id: note.id,
-        color: paperFor(note, i),
-        kept: keptIds.includes(Number(note.id)),
-      })),
-    [visibleNotes, keptIds]
-  );
+    const jarItems = useMemo(
+        () =>
+            visibleNotes.slice(0, MAX_STARS).map((note, i) => ({
+                id: note.id,
+                color: paperFor(note, i),
+                kept: keptIds.includes(Number(note.id)),
+            })),
+        [visibleNotes, keptIds]
+    );
 
-  const hiddenCount = Math.max(0, visibleNotes.length - MAX_STARS);
+    const hiddenCount = Math.max(0, visibleNotes.length - MAX_STARS);
 
-  // keep the index inside the current list
-  useEffect(() => {
-    if (index > visibleNotes.length - 1) {
-      setIndex(Math.max(0, visibleNotes.length - 1));
-    }
-  }, [visibleNotes.length, index]);
-
-  // every new note starts flat and folded
-  useEffect(() => {
-    tilt.reset();
-    setExpanded(false);
-  }, [index, filter, tilt.reset]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  const goTo = useCallback((nextIndex) => {
-    setIndex(nextIndex);
-    setMessage("");
-  }, []);
-
-  const step = useCallback(
-    (direction) => {
-      setIndex((i) => Math.min(Math.max(i + direction, 0), visibleNotes.length - 1));
-      setMessage("");
-    },
-    [visibleNotes.length]
-  );
-
-  const changeFilter = (value) => {
-    setFilter(value);
-    setIndex(0);
-    setMessage("");
-  };
-
-  // Shake the jar: land on a note you weren't already looking at.
-  const drawRandomNote = useCallback(() => {
-    if (visibleNotes.length < 2 || drawing) return;
-
-    setDrawing(true);
-    setMessage("");
-
-    setTimeout(() => {
-      setIndex((current) => {
-        let pick = current;
-        while (pick === current) {
-          pick = Math.floor(Math.random() * visibleNotes.length);
+    // keep the index inside the current list
+    useEffect(() => {
+        if (index > visibleNotes.length - 1) {
+            setIndex(Math.max(0, visibleNotes.length - 1));
         }
-        return pick;
-      });
-      setDrawing(false);
-    }, 620);
-  }, [visibleNotes.length, drawing]);
+    }, [visibleNotes.length, index]);
 
-  // ← → wander, S shakes, Escape folds the letter back up
-  useEffect(() => {
-    const onKey = (event) => {
-      if (event.target?.closest?.("input, textarea, select")) return;
-      if (event.key === "Escape") return setExpanded(false);
-      if (expanded) return;
-      if (event.key === "ArrowRight") step(1);
-      if (event.key === "ArrowLeft") step(-1);
-      if (event.key === "s" || event.key === "S") drawRandomNote();
+    // every new note starts flat and folded
+    useEffect(() => {
+        tilt.reset();
+        setExpanded(false);
+    }, [index, filter, tilt.reset]); // eslint-disable-line react-hooks/exhaustive-deps
+
+    const goTo = useCallback((nextIndex) => {
+        setIndex(nextIndex);
+        setMessage("");
+    }, []);
+
+    const step = useCallback(
+        (direction) => {
+            setIndex((i) => Math.min(Math.max(i + direction, 0), visibleNotes.length - 1));
+            setMessage("");
+        },
+        [visibleNotes.length]
+    );
+
+    const changeFilter = (value) => {
+        setFilter(value);
+        setIndex(0);
+        setMessage("");
     };
 
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [expanded, step, drawRandomNote]);
+    // Shake the jar: land on a note you weren't already looking at.
+    const drawRandomNote = useCallback(() => {
+        if (visibleNotes.length < 2 || drawing) return;
 
-  const handleKeep = async () => {
-    if (!currentNote || collecting) return;
+        setDrawing(true);
+        setMessage("");
 
-    const noteId = Number(currentNote.id);
+        setTimeout(() => {
+            setIndex((current) => {
+                let pick = current;
+                while (pick === current) {
+                    pick = Math.floor(Math.random() * visibleNotes.length);
+                }
+                return pick;
+            });
+            setDrawing(false);
+        }, 620);
+    }, [visibleNotes.length, drawing]);
 
-    if (keptIds.includes(noteId)) {
-      setMessage("This one is already in your treasures.");
-      return;
-    }
+    // ← → wander, S shakes, Escape folds the letter back up
+    useEffect(() => {
+        const onKey = (event) => {
+            if (event.target?.closest?.("input, textarea, select")) return;
+            if (event.key === "Escape") return setExpanded(false);
+            if (expanded) return;
+            if (event.key === "ArrowRight") step(1);
+            if (event.key === "ArrowLeft") step(-1);
+            if (event.key === "s" || event.key === "S") drawRandomNote();
+        };
 
-    try {
-      setCollecting(true);
-      setMessage("");
+        window.addEventListener("keydown", onKey);
+        return () => window.removeEventListener("keydown", onKey);
+    }, [expanded, step, drawRandomNote]);
 
-      await collectNote(currentNote.id, USER_ID);
+    const handleKeep = async () => {
+        if (!currentNote || collecting) return;
 
-      setKeptIds((ids) => [...ids, noteId]);
-      setMessage("Stamped and kept. It's in your treasures now.");
-    } catch (err) {
-      console.error("Collection error:", err);
+        const noteId = Number(currentNote.id);
 
-      if (err.response?.status === 409) {
-        setKeptIds((ids) => (ids.includes(noteId) ? ids : [...ids, noteId]));
-        setMessage("This one is already in your treasures.");
-      } else {
-        setMessage("That didn't save. Try keeping it again.");
-      }
-    } finally {
-      setCollecting(false);
-    }
-  };
+        if (keptIds.includes(noteId)) {
+            setMessage("This one is already in your treasures.");
+            return;
+        }
 
-  const renderStage = () => {
-    if (loading) {
-      return (
-        <div className="lj-status">
-          <SpinningStar />
-          <p>Unfolding…</p>
-        </div>
-      );
-    }
+        try {
+            setCollecting(true);
+            setMessage("");
 
-    if (error) {
-      return (
-        <div className="lj-empty">
-          <h2>The lid is stuck</h2>
-          <p>{error}</p>
-          <button className="lj-btn lj-btn-primary" onClick={reload}>
-            Try again
-          </button>
-        </div>
-      );
-    }
+            await collectNote(currentNote.id, USER_ID);
 
-    if (notes.length === 0) {
-      return (
-        <div className="lj-empty">
-          <h2>Nothing in here yet</h2>
-          <p>The jar fills up one small thing at a time. Start it off.</p>
-          <button className="lj-btn lj-btn-primary" onClick={() => navigate("/add-note")}>
-            Fold the first one
-          </button>
-        </div>
-      );
-    }
+            setKeptIds((ids) => [...ids, noteId]);
+            setMessage("Stamped and kept. It's in your treasures now.");
+        } catch (err) {
+            console.error("Collection error:", err);
 
-    if (!currentNote) {
-      return (
-        <div className="lj-empty">
-          <h2>Nothing under this label</h2>
-          <p>No little things have been filed here yet.</p>
-          <button className="lj-btn lj-btn-ghost" onClick={() => changeFilter("all")}>
-            Show every note
-          </button>
-        </div>
-      );
-    }
+            if (err.response?.status === 409) {
+                setKeptIds((ids) => (ids.includes(noteId) ? ids : [...ids, noteId]));
+                setMessage("This one is already in your treasures.");
+            } else {
+                setMessage("That didn't save. Try keeping it again.");
+            }
+        } finally {
+            setCollecting(false);
+        }
+    };
 
-    return (
-      <>
-        <div className="lj-letter-nav">
-          <button
-            className="lj-round"
-            onClick={() => step(-1)}
-            disabled={index === 0}
-            aria-label="Previous note"
-          >
-            ←
-          </button>
+    const renderStage = () => {
+        if (loading) {
+            return (
+                <div className="lj-status">
+                    <SpinningStar />
+                    <p>Unfolding…</p>
+                </div>
+            );
+        }
 
-          <span className="lj-counter">
+        if (error) {
+            return (
+                <div className="lj-empty">
+                    <h2>The lid is stuck</h2>
+                    <p>{error}</p>
+                    <button className="lj-btn lj-btn-primary" onClick={reload}>
+                        Try again
+                    </button>
+                </div>
+            );
+        }
+
+        if (notes.length === 0) {
+            return (
+                <div className="lj-empty">
+                    <h2>Nothing in here yet</h2>
+                    <p>The jar fills up one small thing at a time. Start it off.</p>
+                    <button className="lj-btn lj-btn-primary" onClick={() => navigate("/add-note")}>
+                        Fold the first one
+                    </button>
+                </div>
+            );
+        }
+
+        if (!currentNote) {
+            return (
+                <div className="lj-empty">
+                    <h2>Nothing under this label</h2>
+                    <p>No little things have been filed here yet.</p>
+                    <button className="lj-btn lj-btn-ghost" onClick={() => changeFilter("all")}>
+                        Show every note
+                    </button>
+                </div>
+            );
+        }
+
+        return (
+            <>
+                <div className="lj-letter-nav">
+                    <button
+                        className="lj-round"
+                        onClick={() => step(-1)}
+                        disabled={index === 0}
+                        aria-label="Previous note"
+                    >
+                        ←
+                    </button>
+
+                    <span className="lj-counter">
             {pad(index + 1)} <i>of</i> {pad(visibleNotes.length)}
           </span>
 
-          <button
-            className="lj-round"
-            onClick={() => step(1)}
-            disabled={index === visibleNotes.length - 1}
-            aria-label="Next note"
-          >
-            →
-          </button>
-        </div>
+                    <button
+                        className="lj-round"
+                        onClick={() => step(1)}
+                        disabled={index === visibleNotes.length - 1}
+                        aria-label="Next note"
+                    >
+                        →
+                    </button>
+                </div>
 
-        <motion.div
-          className="lj-tilt"
-          style={{
-            rotateX: tilt.rotateX,
-            rotateY: tilt.rotateY,
-            transformPerspective: 1000,
-          }}
-          onMouseMove={tilt.onMouseMove}
-          onMouseLeave={tilt.onMouseLeave}
-        >
-          <AnimatePresence mode="wait">
-            <NoteLetter
-              key={currentNote.id}
-              note={currentNote}
-              index={index}
-              total={visibleNotes.length}
-              isKept={isKept}
-              collecting={collecting}
-              onKeep={handleKeep}
-              onExpand={() => setExpanded(true)}
-            />
-          </AnimatePresence>
-        </motion.div>
+                <motion.div
+                    className="lj-tilt"
+                    style={{
+                        rotateX: tilt.rotateX,
+                        rotateY: tilt.rotateY,
+                        transformPerspective: 1000,
+                    }}
+                    onMouseMove={tilt.onMouseMove}
+                    onMouseLeave={tilt.onMouseLeave}
+                >
+                    <AnimatePresence mode="wait">
+                        <NoteLetter
+                            key={currentNote.id}
+                            note={currentNote}
+                            index={index}
+                            total={visibleNotes.length}
+                            isKept={isKept}
+                            collecting={collecting}
+                            onKeep={handleKeep}
+                            onExpand={() => setExpanded(true)}
+                        />
+                    </AnimatePresence>
+                </motion.div>
 
-        <p className="lj-message" aria-live="polite">
-          {message}
-        </p>
-      </>
-    );
-  };
+                <p className="lj-message" aria-live="polite">
+                    {message}
+                </p>
+            </>
+        );
+    };
 
-  return (
-    <main className="lj-scene lj-room">
-      <NightSky count={45} />
-      <div className="lj-lamp lj-lamp-room" aria-hidden="true" />
+    return (
+        <main className="lj-scene lj-room">
+            <NightSky count={45} />
+            <div className="lj-lamp lj-lamp-room" aria-hidden="true" />
 
-      <header className="lj-topbar">
-        <button className="lj-link" onClick={() => navigate("/")}>
-          ← back to the doorway
-        </button>
+            <header className="lj-topbar">
+                <button className="lj-link" onClick={() => navigate("/")}>
+                    ← back to the doorway
+                </button>
 
-        <div className="lj-tally">
+                <div className="lj-tally">
           <span>
             <b>{notes.length}</b> folded
           </span>
-          <span className="lj-dot" />
-          <span>
+                    <span className="lj-dot" />
+                    <span>
             <b>{keptIds.length}</b> kept
           </span>
-        </div>
+                </div>
 
-        <nav className="lj-top-actions">
-          <button className="lj-btn lj-btn-ghost" onClick={() => navigate("/add-note")}>
-            Fold a new one
-          </button>
-          <button className="lj-btn lj-btn-ghost" onClick={() => navigate("/collection")}>
-            Your treasures
-          </button>
-        </nav>
-      </header>
+                <nav className="lj-top-actions">
+                    <button className="lj-btn lj-btn-ghost" onClick={() => navigate("/add-note")}>
+                        Fold a new one
+                    </button>
+                    <button className="lj-btn lj-btn-ghost" onClick={() => navigate("/collection")}>
+                        Your treasures
+                    </button>
+                </nav>
+            </header>
 
-      <div className="lj-room-grid">
-        {/* ---------- the jar on its shelf ---------- */}
-        <section className="lj-jar-side">
-          <motion.div
-            className="lj-room-jar"
-            animate={
-              drawing
-                ? { rotate: [0, -9, 8, -6, 4, 0], y: [0, -12, 0, -5, 0] }
-                : { rotate: 0, y: [0, -6, 0] }
-            }
-            transition={
-              drawing
-                ? { duration: 0.62, ease: "easeInOut" }
-                : { duration: 5, repeat: Infinity, ease: "easeInOut" }
-            }
-          >
-            <GlassJar
-              items={jarItems}
-              activeId={currentNote?.id}
-              onPick={goTo}
-              label="Paper stars in the jar. Choose one to unfold it."
-            />
-          </motion.div>
-          <div className="lj-shelf" aria-hidden="true" />
+            <div className="lj-room-grid">
+                {/* ---------- the jar on its shelf ---------- */}
+                <section className="lj-jar-side">
+                    <motion.div
+                        className="lj-room-jar"
+                        animate={
+                            drawing
+                                ? { rotate: [0, -9, 8, -6, 4, 0], y: [0, -12, 0, -5, 0] }
+                                : { rotate: 0, y: [0, -6, 0] }
+                        }
+                        transition={
+                            drawing
+                                ? { duration: 0.62, ease: "easeInOut" }
+                                : { duration: 5, repeat: Infinity, ease: "easeInOut" }
+                        }
+                    >
+                        <GlassJar
+                            items={jarItems}
+                            activeId={currentNote?.id}
+                            onPick={goTo}
+                            label="Paper stars in the jar. Choose one to unfold it."
+                        />
+                    </motion.div>
+                    <div className="lj-shelf" aria-hidden="true" />
 
-          <button
-            className="lj-btn lj-btn-primary lj-shake"
-            onClick={drawRandomNote}
-            disabled={visibleNotes.length < 2 || drawing}
-          >
-            {drawing ? "Shaking…" : "Shake for a random one"}
-          </button>
+                    <button
+                        className="lj-btn lj-btn-primary lj-shake"
+                        onClick={drawRandomNote}
+                        disabled={visibleNotes.length < 2 || drawing}
+                    >
+                        {drawing ? "Shaking…" : "Shake for a random one"}
+                    </button>
 
-          <p className="lj-hint">
-            tap a star to unfold it · ← → to wander · S to shake
-          </p>
-          {hiddenCount > 0 && (
-            <p className="lj-hint">+{hiddenCount} more buried deeper in the jar</p>
-          )}
-        </section>
+                    <p className="lj-hint">
+                        tap a star to unfold it · ← → to wander · S to shake
+                    </p>
+                    {hiddenCount > 0 && (
+                        <p className="lj-hint">+{hiddenCount} more buried deeper in the jar</p>
+                    )}
+                </section>
 
-        {/* ---------- the unfolded letter ---------- */}
-        <section className="lj-letter-side">
-          {categories.length > 0 && (
-            <div className="lj-chips" aria-label="Filter notes by label">
-              <button
-                className={`lj-chip${filter === "all" ? " is-on" : ""}`}
-                onClick={() => changeFilter("all")}
-                aria-pressed={filter === "all"}
-              >
-                everything
-              </button>
-              {categories.map((category) => {
-                const on = String(filter) === String(category.id);
-                return (
-                  <button
-                    key={category.id}
-                    className={`lj-chip${on ? " is-on" : ""}`}
-                    onClick={() => changeFilter(category.id)}
-                    aria-pressed={on}
-                  >
-                    {category.name}
-                  </button>
-                );
-              })}
+                {/* ---------- the unfolded letter ---------- */}
+                <section className="lj-letter-side">
+                    {categories.length > 0 && (
+                        <div className="lj-chips" aria-label="Filter notes by label">
+                            <button
+                                className={`lj-chip${filter === "all" ? " is-on" : ""}`}
+                                onClick={() => changeFilter("all")}
+                                aria-pressed={filter === "all"}
+                            >
+                                everything
+                            </button>
+                            {categories.map((category) => {
+                                const on = String(filter) === String(category.id);
+                                return (
+                                    <button
+                                        key={category.id}
+                                        className={`lj-chip${on ? " is-on" : ""}`}
+                                        onClick={() => changeFilter(category.id)}
+                                        aria-pressed={on}
+                                    >
+                                        {category.name}
+                                    </button>
+                                );
+                            })}
+                        </div>
+                    )}
+
+                    {renderStage()}
+                </section>
             </div>
-          )}
 
-          {renderStage()}
-        </section>
-      </div>
-
-      <LetterModal
-        note={expanded ? currentNote : null}
-        index={index}
-        onClose={() => setExpanded(false)}
-      />
-    </main>
-  );
+            <LetterModal
+                note={expanded ? currentNote : null}
+                index={index}
+                onClose={() => setExpanded(false)}
+            />
+        </main>
+    );
 }
 const STYLES = `
 @import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..700;1,9..144,300..700&family=Caveat:wght@500;700&family=Karla:wght@400;500;700&display=swap');
@@ -1343,16 +1343,16 @@ const STYLES = `
 `;
 
 function JarStyles() {
-  return <style>{STYLES}</style>;
+    return <style>{STYLES}</style>;
 }
 
 function LockIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
-      <rect x="4" y="11" width="16" height="10" rx="2" />
-      <path d="M8 11V7a4 4 0 0 1 8 0v4" />
-    </svg>
-  );
+    return (
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+            <rect x="4" y="11" width="16" height="10" rx="2" />
+            <path d="M8 11V7a4 4 0 0 1 8 0v4" />
+        </svg>
+    );
 }
 
 // ---------------------------------------------------------------------
@@ -1360,36 +1360,36 @@ function LockIcon() {
 // ---------------------------------------------------------------------
 
 function App() {
-  const [isUnlocked, setIsUnlocked] = useState(
-    () => sessionStorage.getItem("jarAccessGranted") === "true"
-  );
+    const [isUnlocked, setIsUnlocked] = useState(
+        () => sessionStorage.getItem("jarAccessGranted") === "true"
+    );
 
-  if (!isUnlocked) {
-    return <AccessGate onUnlock={() => setIsUnlocked(true)} />;
-  }
+    if (!isUnlocked) {
+        return <AccessGate onUnlock={() => setIsUnlocked(true)} />;
+    }
 
-  const handleLock = () => {
-    sessionStorage.removeItem("jarAccessGranted");
-    setIsUnlocked(false);
-  };
+    const handleLock = () => {
+        sessionStorage.removeItem("jarAccessGranted");
+        setIsUnlocked(false);
+    };
 
-  return (
-    <BrowserRouter>
-      <JarStyles />
+    return (
+        <BrowserRouter>
+            <JarStyles />
 
-      <button onClick={handleLock} className="lj-lock">
-        <LockIcon />
-        Lock the jar
-      </button>
+            <button onClick={handleLock} className="lj-lock">
+                <LockIcon />
+                Lock the jar
+            </button>
 
-      <Routes>
-        <Route path="/" element={<Welcome />} />
-        <Route path="/jar" element={<JarRoom />} />
-        <Route path="/add-note" element={<AddNote />} />
-        <Route path="/collection" element={<Collection />} />
-      </Routes>
-    </BrowserRouter>
-  );
+            <Routes>
+                <Route path="/" element={<Welcome />} />
+                <Route path="/jar" element={<JarRoom />} />
+                <Route path="/add-note" element={<AddNote />} />
+                <Route path="/collection" element={<Collection />} />
+            </Routes>
+        </BrowserRouter>
+    );
 }
 
 export default App;
