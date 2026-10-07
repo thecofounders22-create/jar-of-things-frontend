@@ -4,31 +4,26 @@ import { useNavigate } from "react-router-dom";
 import { getCollectedNotes } from "../services/api";
 
 /* =====================================================================
-   COLLECTION — "the washing line"
-   Every note you stamped hangs from a string of pegs under the night
-   sky, swaying a little. Search, filter by corner, sort, or let the
-   line pick one for you. Open any letter and flip through the rest.
-   ===================================================================== */
+   COLLECTION — THE ROYAL MEMORY ARCHIVE
 
-// ---------------------------------------------------------------------
-// Constants & helpers
-// ---------------------------------------------------------------------
+   The collection is no longer a washing line.
+
+   Each memory is treated like an heirloom document preserved inside
+   a private archive.
+   ===================================================================== */
 
 const USER_ID = 1;
 
-// Same rule the jar uses: past this, the note gets clamped to a preview.
 const LONG_NOTE_LENGTH = 220;
 
 const PAPER_COLORS = [
-  "#f6d7b0",
-  "#f3b6a8",
-  "#c9dcc0",
-  "#f1e3a4",
-  "#cfd6ee",
-  "#e9c3d9",
+  "#ead8b9",
+  "#e6cda8",
+  "#dfc7a4",
+  "#efe0c4",
+  "#e2cfb1",
+  "#e8d4bd",
 ];
-
-const TILTS = [-2.2, 1.6, -0.8, 2.4, -1.6, 0.9];
 
 const SORTS = [
   { id: "newest", label: "newest first" },
@@ -36,334 +31,920 @@ const SORTS = [
   { id: "jar", label: "as they were kept" },
 ];
 
-function buildStarPath(outer = 12, inner = 6.2) {
-  const points = [];
-  for (let i = 0; i < 10; i += 1) {
-    const radius = i % 2 === 0 ? outer : inner;
-    const angle = (Math.PI / 5) * i - Math.PI / 2;
-    points.push(
-      `${(Math.cos(angle) * radius).toFixed(2)},${(Math.sin(angle) * radius).toFixed(2)}`
-    );
-  }
-  return `M${points.join("L")}Z`;
-}
-
-const STAR_PATH = buildStarPath();
-
 const pad = (n) => String(n).padStart(2, "0");
+
+/* ---------------------------------------------------------------------
+   Helpers
+   --------------------------------------------------------------------- */
 
 const toTime = (value) => {
   if (!value) return null;
+
   const time = new Date(value).getTime();
+
   return Number.isNaN(time) ? null : time;
 };
 
 const formatDate = (value, long = false) => {
   const time = toTime(value);
+
   if (time === null) return null;
+
   return new Date(time).toLocaleDateString(
-    undefined,
-    long
-      ? { day: "numeric", month: "long", year: "numeric" }
-      : { day: "numeric", month: "short", year: "numeric" }
+      undefined,
+      long
+          ? {
+            day: "numeric",
+            month: "long",
+            year: "numeric",
+          }
+          : {
+            day: "numeric",
+            month: "short",
+            year: "numeric",
+          }
   );
 };
 
-// Flatten whatever shape the API returns into one tidy object per note.
+const getMemoryTitle = (content, categoryName) => {
+  if (!content) {
+    return categoryName || "A little thing worth keeping";
+  }
+
+  const firstLine = content
+      .split(/\r?\n/)
+      .map((line) => line.trim())
+      .find(Boolean);
+
+  if (!firstLine) {
+    return categoryName || "A little thing worth keeping";
+  }
+
+  if (firstLine.length <= 52) {
+    return firstLine;
+  }
+
+  return `${firstLine.slice(0, 49)}…`;
+};
+
+const getInitial = (content) => {
+  if (!content) return "M";
+
+  const character = content.trim().charAt(0);
+
+  return character ? character.toUpperCase() : "M";
+};
+
+/* ---------------------------------------------------------------------
+   Normalize API data
+   --------------------------------------------------------------------- */
+
 const normalize = (collection, index) => {
   const note = collection?.note || collection || {};
+
   const numericId = Number(note.id);
-  const seed = Number.isFinite(numericId) ? Math.abs(numericId) : index;
+
+  const seed = Number.isFinite(numericId)
+      ? Math.abs(numericId)
+      : index;
+
+  const categoryName =
+      note.category?.name ||
+      note.categoryName ||
+      "";
+
+  const content = note.content || "";
 
   return {
-    key: collection?.id ?? note.id ?? `note-${index}`,
+    key:
+        collection?.id ??
+        note.id ??
+        `note-${index}`,
+
     order: index,
-    content: note.content || "",
+
+    content,
+
     imageUrl: note.imageUrl,
-    categoryName: note.category?.name || note.categoryName || "",
-    date: note.createdAt || collection?.createdAt || null,
-    paper: PAPER_COLORS[seed % PAPER_COLORS.length],
-    tilt: TILTS[index % TILTS.length],
+
+    categoryName,
+
+    date:
+        note.createdAt ||
+        collection?.createdAt ||
+        null,
+
+    paper:
+        PAPER_COLORS[seed % PAPER_COLORS.length],
+
+    title: getMemoryTitle(
+        content,
+        categoryName
+    ),
+
+    initial: getInitial(content),
   };
 };
 
-// ---------------------------------------------------------------------
-// Small pieces
-// ---------------------------------------------------------------------
-
-function SpinningStar() {
-  return (
-    <motion.svg
-      width="34"
-      height="34"
-      viewBox="-16 -16 32 32"
-      animate={{ rotate: 360 }}
-      transition={{ duration: 2.4, repeat: Infinity, ease: "linear" }}
-      aria-hidden="true"
-    >
-      <path
-        d={STAR_PATH}
-        fill="#f3b660"
-        stroke="#f3b660"
-        strokeWidth="4"
-        strokeLinejoin="round"
-      />
-    </motion.svg>
-  );
-}
+/* =====================================================================
+   ICONS
+   ===================================================================== */
 
 function SearchIcon() {
   return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
-      <circle cx="11" cy="11" r="7" />
-      <path d="M20 20l-3.5-3.5" />
-    </svg>
+      <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.6"
+          aria-hidden="true"
+      >
+        <circle cx="11" cy="11" r="6.8" />
+        <path d="M16 16l5 5" />
+      </svg>
   );
 }
 
-function HangingNote({ note, index, onOpen }) {
-  const isLong = note.content.length > LONG_NOTE_LENGTH;
+function ArchiveIcon() {
+  return (
+      <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.3"
+          aria-hidden="true"
+      >
+        <path d="M4 7.5h16" />
+        <path d="M5.5 7.5v11h13v-11" />
+        <path d="M7 4.5h10l1.5 3H5.5z" />
+        <path d="M9 12h6" />
+      </svg>
+  );
+}
+
+function CrownIcon() {
+  return (
+      <svg
+          viewBox="0 0 32 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.2"
+          aria-hidden="true"
+      >
+        <path d="M3 5l6 5 7-8 7 8 6-5-3 14H6z" />
+        <path d="M6 19h20" />
+      </svg>
+  );
+}
+
+function WaxSeal() {
+  return (
+      <div className="ra-seal" aria-hidden="true">
+      <span className="ra-seal-inner">
+        M
+      </span>
+      </div>
+  );
+}
+
+/* =====================================================================
+   ARCHIVE CARD
+   ===================================================================== */
+
+function ArchiveCard({
+                       note,
+                       index,
+                       onOpen,
+                     }) {
+  const isLong =
+      note.content.length >
+      LONG_NOTE_LENGTH;
+
   const date = formatDate(note.date);
 
   return (
-    <motion.li
-      className="tr-hang"
-      layout
-      initial={{ opacity: 0, y: -40 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: 30, transition: { duration: 0.2 } }}
-      transition={{
-        type: "spring",
-        stiffness: 120,
-        damping: 14,
-        delay: Math.min(index, 9) * 0.06,
-      }}
-    >
-      <span className="tr-peg" aria-hidden="true" />
-
-      <button
-        className="tr-card"
-        style={{
-          "--paper": note.paper,
-          "--tilt": `${note.tilt}deg`,
-          "--delay": `${(index % 5) * -1.4}s`,
-        }}
-        onClick={() => onOpen(index)}
-        aria-label={`Open treasured note ${index + 1}`}
+      <motion.article
+          className="ra-card-wrap"
+          layout
+          initial={{
+            opacity: 0,
+            y: 30,
+          }}
+          animate={{
+            opacity: 1,
+            y: 0,
+          }}
+          exit={{
+            opacity: 0,
+            y: 30,
+          }}
+          transition={{
+            duration: 0.45,
+            delay:
+                Math.min(index, 8) * 0.055,
+            ease: [0.22, 1, 0.36, 1],
+          }}
       >
-        <span className="tr-card-head">
-          <span className="tr-card-no">No. {pad(index + 1)}</span>
-          {date && <span>{date}</span>}
-        </span>
-
-        <span className="tr-card-body">{note.content}</span>
-
-        {note.imageUrl && (
-          <span className="tr-thumb">
-            <img src={note.imageUrl} alt="Memory attached to this note" />
+        <button
+            className="ra-card"
+            onClick={() => onOpen(index)}
+            style={{
+              "--paper": note.paper,
+            }}
+            aria-label={`Open memory ${index + 1}`}
+        >
+          {/* decorative top label */}
+          <div className="ra-card-top">
+          <span className="ra-card-archive">
+            PERSONAL ARCHIVE
           </span>
-        )}
 
-        <span className="tr-card-foot">
-          {note.categoryName ? (
-            <span className="lj-label">{note.categoryName}</span>
-          ) : (
+            <span className="ra-card-number">
+            No. {pad(index + 1)}
+          </span>
+          </div>
+
+          {/* ornament */}
+          <div className="ra-card-ornament">
             <span />
+            <i>✦</i>
+            <span />
+          </div>
+
+          {/* title */}
+          <div className="ra-card-heading">
+          <span className="ra-card-initial">
+            {note.initial}
+          </span>
+
+            <div>
+            <span className="ra-card-kicker">
+              {note.categoryName ||
+                  "A LITTLE MEMORY"}
+            </span>
+
+              <h2>{note.title}</h2>
+            </div>
+          </div>
+
+          {/* preview */}
+          <p className="ra-card-preview">
+            {note.content}
+          </p>
+
+          {/* image */}
+          {note.imageUrl && (
+              <div className="ra-card-photo">
+                <img
+                    src={note.imageUrl}
+                    alt="Memory attached to this note"
+                />
+
+                <span className="ra-photo-caption">
+              preserved photograph
+            </span>
+              </div>
           )}
-          <span className="tr-read">{isLong ? "read the rest →" : "open →"}</span>
-        </span>
-      </button>
-    </motion.li>
+
+          {/* bottom */}
+          <div className="ra-card-bottom">
+            <div className="ra-card-meta">
+              {date && (
+                  <span>
+                {date}
+              </span>
+              )}
+
+              {note.categoryName && (
+                  <span>
+                {note.categoryName}
+              </span>
+              )}
+            </div>
+
+            <span className="ra-open">
+            {isLong
+                ? "open archive"
+                : "open memory"}
+              <b>↗</b>
+          </span>
+          </div>
+
+          <div className="ra-card-corner ra-card-corner-tl" />
+          <div className="ra-card-corner ra-card-corner-tr" />
+          <div className="ra-card-corner ra-card-corner-bl" />
+          <div className="ra-card-corner ra-card-corner-br" />
+        </button>
+      </motion.article>
   );
 }
 
-function LetterViewer({ notes, index, onClose, onStep }) {
-  const note = index !== null ? notes[index] : null;
+/* =====================================================================
+   MEMORY VIEWER
+   ===================================================================== */
+
+function LetterViewer({
+                        notes,
+                        index,
+                        onClose,
+                        onStep,
+                      }) {
+  const note =
+      index !== null
+          ? notes[index]
+          : null;
 
   return (
-    <AnimatePresence>
-      {note && (
-        <motion.div
-          className="lj-backdrop"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.25 }}
-          onClick={onClose}
-        >
-          <div className="tr-viewer" onClick={(event) => event.stopPropagation()}>
-            <AnimatePresence mode="wait">
-              <motion.article
-                key={note.key}
-                className="lj-letter lj-modal"
-                style={{ "--paper": note.paper }}
-                role="dialog"
-                aria-modal="true"
-                initial={{ opacity: 0, y: 30, rotateX: -30 }}
-                animate={{ opacity: 1, y: 0, rotateX: 0 }}
-                exit={{ opacity: 0, y: -20, transition: { duration: 0.15 } }}
-                transition={{ type: "spring", stiffness: 170, damping: 20 }}
+      <AnimatePresence>
+        {note && (
+            <motion.div
+                className="ra-overlay"
+                initial={{
+                  opacity: 0,
+                }}
+                animate={{
+                  opacity: 1,
+                }}
+                exit={{
+                  opacity: 0,
+                }}
+                transition={{
+                  duration: 0.3,
+                }}
+                onClick={onClose}
+            >
+              <div
+                  className="ra-viewer"
+                  onClick={(event) =>
+                      event.stopPropagation()
+                  }
               >
-                <button
-                  className="lj-close"
-                  onClick={onClose}
-                  aria-label="Fold the note back up"
-                >
-                  ✕
-                </button>
+                <AnimatePresence mode="wait">
+                  <motion.article
+                      key={note.key}
+                      className="ra-document"
+                      style={{
+                        "--paper": note.paper,
+                      }}
+                      role="dialog"
+                      aria-modal="true"
+                      aria-label="Memory archive document"
+                      initial={{
+                        opacity: 0,
+                        scale: 0.94,
+                        y: 35,
+                      }}
+                      animate={{
+                        opacity: 1,
+                        scale: 1,
+                        y: 0,
+                      }}
+                      exit={{
+                        opacity: 0,
+                        scale: 0.97,
+                        y: -20,
+                      }}
+                      transition={{
+                        type: "spring",
+                        stiffness: 170,
+                        damping: 22,
+                      }}
+                  >
+                    {/* OUTER FRAME */}
+                    <div className="ra-document-frame">
 
-                <div className="lj-letter-head">
-                  <span className="lj-letter-no">
-                    No. {pad(index + 1)} / {pad(notes.length)}
+                      {/* close */}
+                      <button
+                          className="ra-close"
+                          onClick={onClose}
+                          aria-label="Close memory"
+                      >
+                        <span>×</span>
+                      </button>
+
+                      {/* document top */}
+                      <header className="ra-document-head">
+
+                        <div className="ra-document-class">
+                      <span>
+                        PRIVATE COLLECTION
+                      </span>
+
+                          <span>
+                        ARCHIVE / {pad(index + 1)}
+                      </span>
+                        </div>
+
+                        <div className="ra-document-title-row">
+                          <div>
+                        <span className="ra-document-kicker">
+                          A MEMORY PRESERVED
+                        </span>
+
+                            <h2>
+                              {note.title}
+                            </h2>
+                          </div>
+
+                          <WaxSeal />
+                        </div>
+
+                        <div className="ra-document-rule">
+                          <span />
+                          <i>✦</i>
+                          <span />
+                        </div>
+
+                        <div className="ra-document-details">
+                      <span>
+                        RECORD No.{" "}
+                        {pad(index + 1)}
+                      </span>
+
+                          {note.categoryName && (
+                              <span>
+                          {note.categoryName}
+                        </span>
+                          )}
+
+                          {note.date && (
+                              <span>
+                          {formatDate(
+                              note.date,
+                              true
+                          )}
+                        </span>
+                          )}
+                        </div>
+                      </header>
+
+                      {/* body */}
+                      <div className="ra-document-scroll">
+                        <section className="ra-document-content">
+
+                          <div className="ra-manuscript-mark">
+                            {note.initial}
+                          </div>
+
+                          <p>
+                            {note.content}
+                          </p>
+
+                          {note.imageUrl && (
+                              <figure className="ra-mounted-photo">
+                                <div className="ra-photo-frame">
+                                  <img
+                                      src={note.imageUrl}
+                                      alt="Memory attached to this note"
+                                  />
+                                </div>
+
+                                <figcaption>
+                            <span>
+                              ARCHIVED PHOTOGRAPH
+                            </span>
+
+                                  <span>
+                              kept alongside this memory
+                            </span>
+                                </figcaption>
+                              </figure>
+                          )}
+
+                        </section>
+                      </div>
+
+                      {/* footer */}
+                      <footer className="ra-document-footer">
+
+                        <div className="ra-footer-left">
+                          <CrownIcon />
+
+                          <span>
+                        Every little thing
+                        <br />
+                        is worth keeping.
+                      </span>
+                        </div>
+
+                        <div className="ra-footer-date">
+                          <small>
+                            PRESERVED
+                          </small>
+
+                          <strong>
+                            {note.date
+                                ? formatDate(
+                                    note.date,
+                                    true
+                                )
+                                : "without a date"}
+                          </strong>
+                        </div>
+
+                        <div className="ra-footer-mark">
+                          M
+                        </div>
+                      </footer>
+
+                      {/* paper ornaments */}
+                      <span className="ra-document-corner ra-doc-tl" />
+                      <span className="ra-document-corner ra-doc-tr" />
+                      <span className="ra-document-corner ra-doc-bl" />
+                      <span className="ra-document-corner ra-doc-br" />
+
+                      <div className="ra-side-label">
+                        MEMORA · PRIVATE · PRESERVED
+                      </div>
+                    </div>
+                  </motion.article>
+                </AnimatePresence>
+
+                {/* navigation */}
+                {notes.length > 1 && (
+                    <div className="ra-viewer-nav">
+                      <button
+                          className="ra-nav-button"
+                          onClick={() =>
+                              onStep(-1)
+                          }
+                          disabled={index === 0}
+                          aria-label="Previous memory"
+                      >
+                        <span>←</span>
+                        <small>previous</small>
+                      </button>
+
+                      <div className="ra-viewer-counter">
+                  <span>
+                    {pad(index + 1)}
                   </span>
-                </div>
 
-                <p className="lj-letter-body">{note.content}</p>
+                        <i>of</i>
 
-                {note.imageUrl && (
-                  <figure className="lj-polaroid">
-                    <img src={note.imageUrl} alt="Memory attached to this note" />
-                  </figure>
+                        <span>
+                    {pad(notes.length)}
+                  </span>
+                      </div>
+
+                      <button
+                          className="ra-nav-button"
+                          onClick={() =>
+                              onStep(1)
+                          }
+                          disabled={
+                              index ===
+                              notes.length - 1
+                          }
+                          aria-label="Next memory"
+                      >
+                        <small>next</small>
+                        <span>→</span>
+                      </button>
+                    </div>
                 )}
-
-                <footer className="lj-letter-foot">
-                  {note.categoryName ? (
-                    <span className="lj-label">{note.categoryName}</span>
-                  ) : (
-                    <span />
-                  )}
-                  <span className="lj-signoff">
-                    {note.date ? `kept ${formatDate(note.date, true)}` : "kept with love"}
-                  </span>
-                </footer>
-              </motion.article>
-            </AnimatePresence>
-
-            {notes.length > 1 && (
-              <div className="tr-viewer-nav">
-                <button
-                  className="lj-round"
-                  onClick={() => onStep(-1)}
-                  disabled={index === 0}
-                  aria-label="Previous treasure"
-                >
-                  ←
-                </button>
-                <span className="lj-counter">
-                  {pad(index + 1)} <i>of</i> {pad(notes.length)}
-                </span>
-                <button
-                  className="lj-round"
-                  onClick={() => onStep(1)}
-                  disabled={index === notes.length - 1}
-                  aria-label="Next treasure"
-                >
-                  →
-                </button>
               </div>
-            )}
-          </div>
-        </motion.div>
-      )}
-    </AnimatePresence>
+            </motion.div>
+        )}
+      </AnimatePresence>
   );
 }
 
-// ---------------------------------------------------------------------
-// Page
-// ---------------------------------------------------------------------
+/* =====================================================================
+   MAIN COLLECTION
+   ===================================================================== */
 
 function Collection() {
   const navigate = useNavigate();
 
-  const [treasuredNotes, setTreasuredNotes] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  const [
+    treasuredNotes,
+    setTreasuredNotes,
+  ] = useState([]);
 
-  const [searchTerm, setSearchTerm] = useState("");
-  const [corner, setCorner] = useState("all");
-  const [sort, setSort] = useState("newest");
+  const [loading, setLoading] =
+      useState(true);
 
-  // index (inside the visible list) of the letter being read, or null
-  const [openIndex, setOpenIndex] = useState(null);
+  const [error, setError] =
+      useState("");
 
-  const loadTreasuredNotes = async () => {
-    try {
-      setLoading(true);
-      setError("");
+  const [searchTerm, setSearchTerm] =
+      useState("");
 
-      const response = await getCollectedNotes(USER_ID);
+  const [corner, setCorner] =
+      useState("all");
 
-      setTreasuredNotes(Array.isArray(response.data) ? response.data : []);
-    } catch (err) {
-      console.error("Could not load treasured notes:", err);
-      setError("Your treasures didn't load. Try again.");
-    } finally {
-      setLoading(false);
-    }
-  };
+  const [sort, setSort] =
+      useState("newest");
+
+  const [openIndex, setOpenIndex] =
+      useState(null);
+
+  /* -------------------------------------------------------------------
+     Load memories
+     ------------------------------------------------------------------- */
+
+  const loadTreasuredNotes =
+      async () => {
+        try {
+          setLoading(true);
+          setError("");
+
+          const response =
+              await getCollectedNotes(
+                  USER_ID
+              );
+
+          setTreasuredNotes(
+              Array.isArray(
+                  response.data
+              )
+                  ? response.data
+                  : []
+          );
+        } catch (err) {
+          console.error(
+              "Could not load treasured notes:",
+              err
+          );
+
+          setError(
+              "Your treasures didn't load. Try again."
+          );
+        } finally {
+          setLoading(false);
+        }
+      };
 
   useEffect(() => {
     loadTreasuredNotes();
   }, []);
 
-  const allNotes = useMemo(() => treasuredNotes.map(normalize), [treasuredNotes]);
+  /* -------------------------------------------------------------------
+     Normalize
+     ------------------------------------------------------------------- */
 
-  const corners = useMemo(
-    () => [...new Set(allNotes.map((n) => n.categoryName).filter(Boolean))],
-    [allNotes]
+  const allNotes = useMemo(
+      () =>
+          treasuredNotes.map(
+              normalize
+          ),
+      [treasuredNotes]
   );
 
-  const hasDates = allNotes.some((n) => toTime(n.date) !== null);
+  /* -------------------------------------------------------------------
+     Categories
+     ------------------------------------------------------------------- */
+
+  const corners = useMemo(
+      () =>
+          [
+            ...new Set(
+                allNotes
+                    .map(
+                        (note) =>
+                            note.categoryName
+                    )
+                    .filter(Boolean)
+            ),
+          ],
+      [allNotes]
+  );
+
+  const hasDates =
+      allNotes.some(
+          (note) =>
+              toTime(note.date) !== null
+      );
+
+  /* -------------------------------------------------------------------
+     Filtering + sorting
+     ------------------------------------------------------------------- */
 
   const visibleNotes = useMemo(() => {
-    const term = searchTerm.trim().toLowerCase();
+    const term =
+        searchTerm
+            .trim()
+            .toLowerCase();
 
-    const filtered = allNotes.filter((note) => {
-      if (corner !== "all" && note.categoryName !== corner) return false;
-      if (!term) return true;
-      return `${note.content} ${note.categoryName}`.toLowerCase().includes(term);
-    });
+    const filtered =
+        allNotes.filter(
+            (note) => {
+              if (
+                  corner !== "all" &&
+                  note.categoryName !==
+                  corner
+              ) {
+                return false;
+              }
 
-    if (sort === "jar" || !hasDates) return filtered;
+              if (!term) return true;
 
-    return [...filtered].sort((a, b) => {
-      const ta = toTime(a.date) ?? 0;
-      const tb = toTime(b.date) ?? 0;
-      return sort === "newest" ? tb - ta : ta - tb;
-    });
-  }, [allNotes, searchTerm, corner, sort, hasDates]);
+              return `${note.content} ${note.categoryName} ${note.title}`
+                  .toLowerCase()
+                  .includes(term);
+            }
+        );
+
+    if (
+        sort === "jar" ||
+        !hasDates
+    ) {
+      return filtered;
+    }
+
+    return [...filtered].sort(
+        (a, b) => {
+          const ta =
+              toTime(a.date) ?? 0;
+
+          const tb =
+              toTime(b.date) ?? 0;
+
+          return sort === "newest"
+              ? tb - ta
+              : ta - tb;
+        }
+    );
+  }, [
+    allNotes,
+    searchTerm,
+    corner,
+    sort,
+    hasDates,
+  ]);
+
+  /* -------------------------------------------------------------------
+     Stats
+     ------------------------------------------------------------------- */
 
   const stats = useMemo(() => {
-    const times = allNotes.map((n) => toTime(n.date)).filter((t) => t !== null);
+    const times =
+        allNotes
+            .map((note) =>
+                toTime(note.date)
+            )
+            .filter(
+                (time) =>
+                    time !== null
+            );
+
     return {
-      total: allNotes.length,
-      pictures: allNotes.filter((n) => n.imageUrl).length,
-      since: times.length ? formatDate(Math.min(...times), true) : null,
+      total:
+      allNotes.length,
+
+      pictures:
+      allNotes.filter(
+          (note) =>
+              note.imageUrl
+      ).length,
+
+      since:
+          times.length
+              ? formatDate(
+                  Math.min(...times),
+                  true
+              )
+              : null,
     };
   }, [allNotes]);
 
-  // close the viewer if filtering removes the open note
+  /* -------------------------------------------------------------------
+     Close viewer if filtering changes
+     ------------------------------------------------------------------- */
+
   useEffect(() => {
-    if (openIndex !== null && openIndex > visibleNotes.length - 1) {
+    if (
+        openIndex !== null &&
+        openIndex >
+        visibleNotes.length - 1
+    ) {
       setOpenIndex(null);
     }
-  }, [visibleNotes.length, openIndex]);
+  }, [
+    visibleNotes.length,
+    openIndex,
+  ]);
+
+  /* -------------------------------------------------------------------
+     Lock page scrolling while viewer is open
+     ------------------------------------------------------------------- */
+
+  useEffect(() => {
+    if (openIndex === null) {
+      return undefined;
+    }
+
+    const previousOverflow =
+        document.body.style.overflow;
+
+    document.body.style.overflow =
+        "hidden";
+
+    return () => {
+      document.body.style.overflow =
+          previousOverflow;
+    };
+  }, [openIndex]);
+
+  /* -------------------------------------------------------------------
+     Keyboard navigation
+     ------------------------------------------------------------------- */
 
   const step = (direction) => {
-    setOpenIndex((i) =>
-      i === null ? i : Math.min(Math.max(i + direction, 0), visibleNotes.length - 1)
+    setOpenIndex((current) => {
+      if (current === null) {
+        return current;
+      }
+
+      return Math.min(
+          Math.max(
+              current + direction,
+              0
+          ),
+          visibleNotes.length - 1
+      );
+    });
+  };
+
+  useEffect(() => {
+    if (openIndex === null) {
+      return undefined;
+    }
+
+    const onKey = (event) => {
+      if (
+          event.key === "Escape"
+      ) {
+        setOpenIndex(null);
+      }
+
+      if (
+          event.key === "ArrowRight"
+      ) {
+        step(1);
+      }
+
+      if (
+          event.key === "ArrowLeft"
+      ) {
+        step(-1);
+      }
+    };
+
+    window.addEventListener(
+        "keydown",
+        onKey
+    );
+
+    return () => {
+      window.removeEventListener(
+          "keydown",
+          onKey
+      );
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    openIndex,
+    visibleNotes.length,
+  ]);
+
+  /* -------------------------------------------------------------------
+     Surprise
+     ------------------------------------------------------------------- */
+
+  const surprise = () => {
+    if (
+        visibleNotes.length === 0
+    ) {
+      return;
+    }
+
+    setOpenIndex(
+        Math.floor(
+            Math.random() *
+            visibleNotes.length
+        )
     );
   };
 
-  const surprise = () => {
-    if (visibleNotes.length === 0) return;
-    setOpenIndex(Math.floor(Math.random() * visibleNotes.length));
-  };
+  /* -------------------------------------------------------------------
+     Sorting
+     ------------------------------------------------------------------- */
 
   const cycleSort = () => {
-    const at = SORTS.findIndex((s) => s.id === sort);
-    setSort(SORTS[(at + 1) % SORTS.length].id);
+    const current =
+        SORTS.findIndex(
+            (item) =>
+                item.id === sort
+        );
+
+    setSort(
+        SORTS[
+        (current + 1) %
+        SORTS.length
+            ].id
+    );
   };
 
   const clearFilters = () => {
@@ -371,211 +952,457 @@ function Collection() {
     setCorner("all");
   };
 
-  // Escape folds the letter back up; arrows flip through the line.
-  useEffect(() => {
-    if (openIndex === null) return undefined;
-
-    const onKey = (event) => {
-      if (event.key === "Escape") setOpenIndex(null);
-      if (event.key === "ArrowRight") step(1);
-      if (event.key === "ArrowLeft") step(-1);
-    };
-
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [openIndex, visibleNotes.length]);
-
-  const renderLine = () => {
-    if (loading) {
-      return (
-        <div className="lj-status">
-          <SpinningStar />
-          <p>Gathering your treasures…</p>
-        </div>
+  const currentSort =
+      SORTS.find(
+          (item) =>
+              item.id === sort
       );
-    }
 
-    if (error) {
-      return (
-        <div className="lj-empty tr-empty">
-          <h2>The line snapped</h2>
-          <p>{error}</p>
-          <button className="lj-btn lj-btn-primary" onClick={loadTreasuredNotes}>
-            Try again
-          </button>
-        </div>
-      );
-    }
-
-    if (allNotes.length === 0) {
-      return (
-        <motion.div
-          className="lj-empty tr-empty"
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-        >
-          <div className="tr-empty-pegs" aria-hidden="true">
-            <span />
-            <span />
-            <span />
-          </div>
-          <h2>Nothing hanging here yet</h2>
-          <p>
-            Open the jar, unfold a few little things, and stamp the ones you
-            never want to lose.
-          </p>
-          <button className="lj-btn lj-btn-primary" onClick={() => navigate("/jar")}>
-            Go find a note
-          </button>
-        </motion.div>
-      );
-    }
-
-    if (visibleNotes.length === 0) {
-      return (
-        <motion.div
-          className="lj-empty tr-empty"
-          initial={{ opacity: 0, y: 15 }}
-          animate={{ opacity: 1, y: 0 }}
-        >
-          <h2>No matching treasures</h2>
-          <p>Try a different word, feeling, or corner of the jar.</p>
-          <button className="lj-btn lj-btn-ghost" onClick={clearFilters}>
-            Show every treasure
-          </button>
-        </motion.div>
-      );
-    }
-
-    return (
-      <ul className="tr-line">
-        <AnimatePresence mode="popLayout">
-          {visibleNotes.map((note, index) => (
-            <HangingNote
-              key={note.key}
-              note={note}
-              index={index}
-              onOpen={setOpenIndex}
-            />
-          ))}
-        </AnimatePresence>
-      </ul>
-    );
-  };
-
-  const currentSort = SORTS.find((s) => s.id === sort);
+  /* ===================================================================
+     PAGE
+     =================================================================== */
 
   return (
-    <main className="collection-page tr-page">
-      <div className="tr-wrap">
-        <header className="tr-top">
-          <button className="back-button" onClick={() => navigate("/jar")}>
-            ← back to the jar
-          </button>
+      <main className="archive-page">
 
-          <div className="lj-tally">
-            <span>
-              <b>{stats.total}</b> kept
-            </span>
-            <span className="lj-dot" />
-            <span>
-              <b>{stats.pictures}</b> with pictures
-            </span>
-          </div>
-        </header>
+        <div className="archive-grain" />
 
-        <motion.section
-          className="tr-hero"
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, ease: "easeOut" }}
-        >
-          <p className="lj-kicker">little things worth keeping</p>
-          <h1 className="tr-title">
-            Your <em>treasures</em>
-          </h1>
-          <p className="tr-intro">
-            A quiet line of pegs for the words, memories, and feelings you
-            never want to lose.
-            {stats.since && ` Hanging here since 10th May.`}
-          </p>
-        </motion.section>
+        <div className="archive-wrap">
 
-        {!loading && !error && allNotes.length > 0 && (
-          <motion.div
-            className="tr-controls"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.2 }}
-          >
-            <div className="tr-toolbar">
-              <label className="tr-search">
-                <SearchIcon />
-                <span className="an-sr-only">Search your treasures</span>
-                <input
-                  type="search"
-                  placeholder="Search a word or a feeling…"
-                  value={searchTerm}
-                  onChange={(event) => setSearchTerm(event.target.value)}
-                />
-              </label>
+          {/* -------------------------------------------------------------
+           TOP BAR
+           ------------------------------------------------------------- */}
 
-              {hasDates && (
-                <button className="lj-btn lj-btn-ghost tr-sort" onClick={cycleSort}>
-                  ↕ {currentSort.label}
-                </button>
-              )}
+          <header className="archive-top">
 
-              <button
-                className="lj-btn lj-btn-primary tr-surprise"
-                onClick={surprise}
-                disabled={visibleNotes.length === 0}
-              >
-                Pick one for me
-              </button>
+            <button
+                className="archive-back"
+                onClick={() =>
+                    navigate("/jar")
+                }
+            >
+              <span>←</span>
+              return to the jar
+            </button>
+
+            <div className="archive-brand">
+              <ArchiveIcon />
+
+              <div>
+              <span>
+                PRIVATE ARCHIVE
+              </span>
+
+                <strong>
+                  Jar of Little Things
+                </strong>
+              </div>
             </div>
 
-            {corners.length > 1 && (
-              <div className="lj-chips tr-chips" aria-label="Filter by corner">
-                <button
-                  className={`lj-chip${corner === "all" ? " is-on" : ""}`}
-                  onClick={() => setCorner("all")}
-                  aria-pressed={corner === "all"}
-                >
-                  everything
-                </button>
-                {corners.map((name) => (
-                  <button
-                    key={name}
-                    className={`lj-chip${corner === name ? " is-on" : ""}`}
-                    onClick={() => setCorner(name)}
-                    aria-pressed={corner === name}
+            <div className="archive-count">
+            <span>
+              <b>{stats.total}</b>
+              memories
+            </span>
+
+              <i />
+
+              <span>
+              <b>{stats.pictures}</b>
+              photographs
+            </span>
+            </div>
+
+          </header>
+
+          {/* -------------------------------------------------------------
+           HERO
+           ------------------------------------------------------------- */}
+
+          <motion.section
+              className="archive-hero"
+              initial={{
+                opacity: 0,
+                y: 25,
+              }}
+              animate={{
+                opacity: 1,
+                y: 0,
+              }}
+              transition={{
+                duration: 0.8,
+              }}
+          >
+            <div className="hero-crest">
+              <CrownIcon />
+            </div>
+
+            <span className="archive-overline">
+            THE PRIVATE COLLECTION
+          </span>
+
+            <h1>
+              Memories,
+              <em>preserved.</em>
+            </h1>
+
+            <p>
+              A collection of little things
+              that deserved more than being
+              forgotten in a camera roll.
+            </p>
+
+            <div className="hero-rule">
+              <span />
+              <i>✦</i>
+              <span />
+            </div>
+
+            {stats.since && (
+                <small>
+                  The archive has been keeping
+                  your memories since{" "}
+                  <strong>
+                    {stats.since}
+                  </strong>
+                </small>
+            )}
+          </motion.section>
+
+          {/* -------------------------------------------------------------
+           CONTROLS
+           ------------------------------------------------------------- */}
+
+          {!loading &&
+              !error &&
+              allNotes.length > 0 && (
+                  <motion.section
+                      className="archive-controls"
+                      initial={{
+                        opacity: 0,
+                        y: 15,
+                      }}
+                      animate={{
+                        opacity: 1,
+                        y: 0,
+                      }}
+                      transition={{
+                        delay: 0.2,
+                      }}
                   >
-                    {name}
-                  </button>
-                ))}
-              </div>
+                    <div className="archive-toolbar">
+
+                      <label className="archive-search">
+                        <SearchIcon />
+
+                        <span className="sr-only">
+                    Search your memories
+                  </span>
+
+                        <input
+                            type="search"
+                            placeholder="search the archive…"
+                            value={
+                              searchTerm
+                            }
+                            onChange={(
+                                event
+                            ) =>
+                                setSearchTerm(
+                                    event.target
+                                        .value
+                                )
+                            }
+                        />
+                      </label>
+
+                      {hasDates && (
+                          <button
+                              className="archive-control-button"
+                              onClick={
+                                cycleSort
+                              }
+                          >
+                    <span>
+                      SORT
+                    </span>
+
+                            {currentSort.label}
+                          </button>
+                      )}
+
+                      <button
+                          className="archive-surprise"
+                          onClick={
+                            surprise
+                          }
+                          disabled={
+                              visibleNotes.length ===
+                              0
+                          }
+                      >
+                  <span>
+                    ✦
+                  </span>
+
+                        choose a memory
+                      </button>
+
+                    </div>
+
+                    {corners.length >
+                        1 && (
+                            <div className="archive-filters">
+
+                  <span>
+                    FILED UNDER
+                  </span>
+
+                              <div>
+                                <button
+                                    className={
+                                      corner ===
+                                      "all"
+                                          ? "active"
+                                          : ""
+                                    }
+                                    onClick={() =>
+                                        setCorner(
+                                            "all"
+                                        )
+                                    }
+                                >
+                                  all
+                                </button>
+
+                                {corners.map(
+                                    (name) => (
+                                        <button
+                                            key={
+                                              name
+                                            }
+                                            className={
+                                              corner ===
+                                              name
+                                                  ? "active"
+                                                  : ""
+                                            }
+                                            onClick={() =>
+                                                setCorner(
+                                                    name
+                                                )
+                                            }
+                                        >
+                                          {name}
+                                        </button>
+                                    )
+                                )}
+                              </div>
+                            </div>
+                        )}
+
+                    {(searchTerm ||
+                        corner !==
+                        "all") && (
+                        <div className="archive-result">
+                          Showing{" "}
+                          <strong>
+                            {
+                              visibleNotes.length
+                            }
+                          </strong>{" "}
+                          of{" "}
+                          <strong>
+                            {
+                              allNotes.length
+                            }
+                          </strong>{" "}
+                          memories
+                        </div>
+                    )}
+                  </motion.section>
+              )}
+
+          {/* -------------------------------------------------------------
+           CONTENT
+           ------------------------------------------------------------- */}
+
+          <section className="archive-content">
+
+            {loading && (
+                <div className="archive-status">
+                  <div className="loading-seal">
+                    ✦
+                  </div>
+
+                  <span>
+                Opening the archive…
+              </span>
+
+                  <small>
+                    gathering your little things
+                  </small>
+                </div>
             )}
 
-            {(searchTerm || corner !== "all") && visibleNotes.length > 0 && (
-              <p className="tr-result">
-                showing {visibleNotes.length} of {allNotes.length}
-              </p>
-            )}
-          </motion.div>
-        )}
+            {!loading &&
+                error && (
+                    <div className="archive-empty">
+                      <div className="empty-symbol">
+                        ×
+                      </div>
 
-        {renderLine()}
-      </div>
+                      <h2>
+                        The archive is
+                        temporarily closed.
+                      </h2>
 
-      <LetterViewer
-        notes={visibleNotes}
-        index={openIndex}
-        onClose={() => setOpenIndex(null)}
-        onStep={step}
-      />
-    </main>
+                      <p>
+                        {error}
+                      </p>
+
+                      <button
+                          onClick={
+                            loadTreasuredNotes
+                          }
+                      >
+                        try again
+                      </button>
+                    </div>
+                )}
+
+            {!loading &&
+                !error &&
+                allNotes.length ===
+                0 && (
+                    <div className="archive-empty">
+                      <div className="empty-symbol">
+                        ✦
+                      </div>
+
+                      <h2>
+                        The archive is
+                        waiting.
+                      </h2>
+
+                      <p>
+                        Open the jar, find a
+                        little thing, and keep
+                        it here forever.
+                      </p>
+
+                      <button
+                          onClick={() =>
+                              navigate("/jar")
+                          }
+                      >
+                        return to the jar
+                      </button>
+                    </div>
+                )}
+
+            {!loading &&
+                !error &&
+                allNotes.length >
+                0 &&
+                visibleNotes.length ===
+                0 && (
+                    <div className="archive-empty">
+                      <div className="empty-symbol">
+                        ?
+                      </div>
+
+                      <h2>
+                        Nothing was found.
+                      </h2>
+
+                      <p>
+                        Try another word or
+                        another section of the
+                        archive.
+                      </p>
+
+                      <button
+                          onClick={
+                            clearFilters
+                          }
+                      >
+                        show everything
+                      </button>
+                    </div>
+                )}
+
+            {!loading &&
+                !error &&
+                visibleNotes.length >
+                0 && (
+                    <motion.div
+                        className="archive-grid"
+                        layout
+                    >
+                      <AnimatePresence mode="popLayout">
+                        {visibleNotes.map(
+                            (
+                                note,
+                                index
+                            ) => (
+                                <ArchiveCard
+                                    key={
+                                      note.key
+                                    }
+                                    note={note}
+                                    index={
+                                      index
+                                    }
+                                    onOpen={
+                                      setOpenIndex
+                                    }
+                                />
+                            )
+                        )}
+                      </AnimatePresence>
+                    </motion.div>
+                )}
+
+          </section>
+
+          {/* -------------------------------------------------------------
+           FOOTER
+           ------------------------------------------------------------- */}
+
+          <footer className="archive-footer">
+          <span>
+            ✦
+          </span>
+
+            <p>
+              Some things are too little
+              to post,
+              <br />
+              but too important to forget.
+            </p>
+
+            <span>
+            ✦
+          </span>
+          </footer>
+
+        </div>
+
+        {/* ---------------------------------------------------------------
+         VIEWER
+         --------------------------------------------------------------- */}
+
+        <LetterViewer
+            notes={visibleNotes}
+            index={openIndex}
+            onClose={() =>
+                setOpenIndex(null)
+            }
+            onStep={step}
+        />
+
+      </main>
   );
 }
 

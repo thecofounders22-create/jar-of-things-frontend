@@ -1,0 +1,2562 @@
+/* =====================================================================
+   JAR OF LITTLE THINGS
+   COLLECTION — ROYAL MEMORY ARCHIVE
+   ===================================================================== */
+
+.archive-page {
+    --wine: #481f2a;
+    --wine-dark: #29131a;
+    --wine-deep: #170c11;
+
+    --gold: #b58b50;
+    --gold-light: #d8bd88;
+    --gold-dark: #76572f;
+
+    --cream: #eadbc1;
+    --cream-light: #f2e6cf;
+    --paper: #e7d5b7;
+
+    --ink: #30231e;
+    --muted: #9c8c78;
+
+    min-height: 100vh;
+    background:
+            radial-gradient(
+                    circle at 50% 5%,
+                    rgba(111, 52, 63, 0.18),
+                    transparent 32%
+            ),
+            radial-gradient(
+                    circle at 15% 60%,
+                    rgba(121, 78, 43, 0.08),
+                    transparent 30%
+            ),
+            #100b0e;
+
+    color: var(--cream);
+
+    position: relative;
+    overflow: hidden;
+}
+
+/* subtle paper/noise atmosphere */
+.archive-grain {
+    position: fixed;
+    inset: 0;
+
+    pointer-events: none;
+
+    opacity: 0.08;
+
+    background-image:
+            repeating-linear-gradient(
+                    0deg,
+                    transparent 0,
+                    transparent 2px,
+                    rgba(255, 255, 255, 0.03) 3px
+            ),
+            repeating-linear-gradient(
+                    90deg,
+                    transparent 0,
+                    transparent 4px,
+                    rgba(0, 0, 0, 0.08) 5px
+            );
+
+    z-index: 0;
+}
+
+/* =====================================================================
+   WRAPPER
+   ===================================================================== */
+
+.archive-wrap {
+    width: min(1320px, calc(100% - 60px));
+
+    margin: 0 auto;
+
+    position: relative;
+
+    z-index: 2;
+}
+
+/* =====================================================================
+   TOP BAR
+   ===================================================================== */
+
+.archive-top {
+    min-height: 86px;
+
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+
+    align-items: center;
+
+    border-bottom: 1px solid
+    rgba(181, 139, 80, 0.18);
+}
+
+.archive-back {
+    justify-self: start;
+
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+
+    border: 0;
+    background: transparent;
+
+    color: #b7a996;
+
+    font-family:
+            "DM Mono",
+            monospace;
+
+    font-size: 11px;
+    letter-spacing: 0.08em;
+
+    cursor: pointer;
+
+    transition:
+            color 0.2s ease,
+            transform 0.2s ease;
+}
+
+.archive-back span {
+    font-size: 18px;
+}
+
+.archive-back:hover {
+    color: var(--gold-light);
+    transform: translateX(-3px);
+}
+
+.archive-brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    color: var(--gold-light);
+}
+
+.archive-brand svg {
+    width: 28px;
+    height: 28px;
+}
+
+.archive-brand div {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.archive-brand span {
+    font-family:
+            "DM Mono",
+            monospace;
+
+    font-size: 8px;
+
+    letter-spacing: 0.2em;
+
+    opacity: 0.65;
+}
+
+.archive-brand strong {
+    font-family:
+            "Cormorant Garamond",
+            Georgia,
+            serif;
+
+    font-size: 17px;
+
+    font-weight: 500;
+
+    letter-spacing: 0.04em;
+}
+
+.archive-count {
+    justify-self: end;
+
+    display: flex;
+    align-items: center;
+    gap: 13px;
+
+    color: #8f7d6e;
+
+    font-family:
+            "DM Mono",
+            monospace;
+
+    font-size: 9px;
+
+    text-transform: uppercase;
+
+    letter-spacing: 0.08em;
+}
+
+.archive-count b {
+    color: var(--gold-light);
+
+    font-family:
+            "Cormorant Garamond",
+            serif;
+
+    font-size: 19px;
+
+    font-weight: 500;
+
+    margin-right: 4px;
+}
+
+.archive-count i {
+    width: 3px;
+    height: 3px;
+
+    background: var(--gold-dark);
+
+    border-radius: 50%;
+}
+
+/* =====================================================================
+   HERO
+   ===================================================================== */
+
+.archive-hero {
+    text-align: center;
+
+    max-width: 760px;
+
+    margin: 92px auto 65px;
+}
+
+.hero-crest {
+    width: 55px;
+    height: 40px;
+
+    margin: 0 auto 18px;
+
+    color: var(--gold);
+}
+
+.hero-crest svg {
+    width: 55px;
+    height: 40px;
+}
+
+.archive-overline {
+    display: block;
+
+    color: var(--gold);
+
+    font-family:
+            "DM Mono",
+            monospace;
+
+    font-size: 9px;
+
+    letter-spacing: 0.35em;
+
+    margin-bottom: 16px;
+}
+
+.archive-hero h1 {
+    margin: 0;
+
+    font-family:
+            "Cormorant Garamond",
+            Georgia,
+            serif;
+
+    font-size: clamp(
+            58px,
+            8vw,
+            100px
+    );
+
+    font-weight: 400;
+
+    line-height: 0.85;
+
+    color: var(--cream-light);
+
+    letter-spacing: -0.035em;
+}
+
+.archive-hero h1 em {
+    display: block;
+
+    color: var(--gold-light);
+
+    font-weight: 400;
+
+    font-style: italic;
+
+    margin-top: 10px;
+}
+
+.archive-hero p {
+    max-width: 520px;
+
+    margin: 32px auto 20px;
+
+    color: #958476;
+
+    font-family:
+            "Cormorant Garamond",
+            Georgia,
+            serif;
+
+    font-size: 20px;
+
+    line-height: 1.45;
+}
+
+.hero-rule {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    gap: 12px;
+
+    margin: 27px auto 17px;
+}
+
+.hero-rule span {
+    width: 100px;
+    height: 1px;
+
+    background:
+            linear-gradient(
+                    to right,
+                    transparent,
+                    rgba(181, 139, 80, 0.5)
+            );
+}
+
+.hero-rule span:last-child {
+    background:
+            linear-gradient(
+                    to left,
+                    transparent,
+                    rgba(181, 139, 80, 0.5)
+            );
+}
+
+.hero-rule i {
+    color: var(--gold);
+
+    font-style: normal;
+
+    font-size: 12px;
+}
+
+.archive-hero small {
+    color: #76685d;
+
+    font-family:
+            "DM Mono",
+            monospace;
+
+    font-size: 9px;
+
+    letter-spacing: 0.04em;
+}
+
+.archive-hero small strong {
+    color: var(--gold-light);
+
+    font-weight: 400;
+}
+
+/* =====================================================================
+   CONTROLS
+   ===================================================================== */
+
+.archive-controls {
+    margin-bottom: 48px;
+}
+
+.archive-toolbar {
+    display: grid;
+
+    grid-template-columns:
+    minmax(250px, 1fr)
+    auto
+    auto;
+
+    gap: 10px;
+
+    padding: 8px;
+
+    background: rgba(41, 19, 26, 0.75);
+
+    border: 1px solid
+    rgba(181, 139, 80, 0.16);
+
+    box-shadow:
+            0 15px 40px
+            rgba(0, 0, 0, 0.2);
+}
+
+.archive-search {
+    min-height: 46px;
+
+    display: flex;
+    align-items: center;
+
+    gap: 12px;
+
+    padding: 0 15px;
+
+    background: rgba(12, 7, 10, 0.55);
+
+    border: 1px solid
+    rgba(181, 139, 80, 0.1);
+}
+
+.archive-search svg {
+    width: 17px;
+    height: 17px;
+
+    color: var(--gold);
+
+    flex: 0 0 auto;
+}
+
+.archive-search input {
+    width: 100%;
+
+    border: 0;
+    outline: 0;
+
+    background: transparent;
+
+    color: var(--cream);
+
+    font-family:
+            "Cormorant Garamond",
+            serif;
+
+    font-size: 17px;
+}
+
+.archive-search input::placeholder {
+    color: #675a52;
+}
+
+.archive-control-button,
+.archive-surprise {
+    border: 1px solid
+    rgba(181, 139, 80, 0.25);
+
+    padding: 0 19px;
+
+    background: transparent;
+
+    color: #b5a28d;
+
+    font-family:
+            "DM Mono",
+            monospace;
+
+    font-size: 9px;
+
+    letter-spacing: 0.08em;
+
+    cursor: pointer;
+
+    transition: 0.25s ease;
+}
+
+.archive-control-button span {
+    color: #65574d;
+
+    margin-right: 8px;
+}
+
+.archive-control-button:hover {
+    border-color: var(--gold);
+
+    color: var(--gold-light);
+}
+
+.archive-surprise {
+    background: var(--wine);
+
+    color: var(--gold-light);
+
+    border-color:
+            rgba(216, 189, 136, 0.3);
+}
+
+.archive-surprise span {
+    margin-right: 7px;
+
+    color: var(--gold);
+}
+
+.archive-surprise:hover:not(:disabled) {
+    background: #5b2734;
+
+    transform: translateY(-1px);
+}
+
+.archive-surprise:disabled {
+    opacity: 0.4;
+
+    cursor: not-allowed;
+}
+
+.archive-filters {
+    display: flex;
+
+    align-items: center;
+
+    gap: 15px;
+
+    margin-top: 14px;
+}
+
+.archive-filters > span {
+    color: #62554c;
+
+    font-family:
+            "DM Mono",
+            monospace;
+
+    font-size: 8px;
+
+    letter-spacing: 0.15em;
+}
+
+.archive-filters > div {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.archive-filters button {
+    border: 1px solid
+    rgba(181, 139, 80, 0.15);
+
+    background: transparent;
+
+    color: #7d6d60;
+
+    padding: 7px 11px;
+
+    font-family:
+            "DM Mono",
+            monospace;
+
+    font-size: 8px;
+
+    cursor: pointer;
+
+    transition: 0.2s ease;
+}
+
+.archive-filters button:hover,
+.archive-filters button.active {
+    color: var(--gold-light);
+
+    border-color:
+            rgba(181, 139, 80, 0.5);
+
+    background:
+            rgba(72, 31, 42, 0.55);
+}
+
+.archive-result {
+    margin-top: 14px;
+
+    color: #64574e;
+
+    font-family:
+            "DM Mono",
+            monospace;
+
+    font-size: 8px;
+
+    text-transform: uppercase;
+
+    letter-spacing: 0.1em;
+}
+
+.archive-result strong {
+    color: var(--gold);
+    font-weight: 400;
+}
+
+/* =====================================================================
+   ARCHIVE GRID
+   ===================================================================== */
+
+.archive-grid {
+    display: grid;
+
+    grid-template-columns:
+    repeat(
+      3,
+      minmax(0, 1fr)
+    );
+
+    gap: 30px;
+
+    align-items: start;
+}
+
+/* =====================================================================
+   ROYAL MEMORY CARD
+   ===================================================================== */
+
+.ra-card-wrap {
+    position: relative;
+}
+
+.ra-card {
+    width: 100%;
+
+    min-height: 470px;
+
+    position: relative;
+
+    display: flex;
+    flex-direction: column;
+
+    text-align: left;
+
+    padding: 27px 29px 23px;
+
+    border: 0;
+
+    background:
+            radial-gradient(
+                    circle at 50% 0%,
+                    rgba(255, 255, 255, 0.3),
+                    transparent 30%
+            ),
+            linear-gradient(
+                    145deg,
+                    #eee0c5,
+                    var(--paper),
+                    #d9c39e
+            );
+
+    color: var(--ink);
+
+    cursor: pointer;
+
+    overflow: hidden;
+
+    box-shadow:
+            0 20px 35px
+            rgba(0, 0, 0, 0.28),
+            0 3px 0
+            rgba(91, 57, 31, 0.5);
+
+    transition:
+            transform 0.4s
+            cubic-bezier(
+                    0.22,
+                    1,
+                    0.36,
+                    1
+            ),
+            box-shadow 0.4s ease;
+}
+
+.ra-card:hover {
+    transform:
+            translateY(-8px)
+            rotate(-0.4deg);
+
+    box-shadow:
+            0 30px 55px
+            rgba(0, 0, 0, 0.38),
+            0 4px 0
+            rgba(91, 57, 31, 0.5);
+}
+
+/* paper texture */
+.ra-card::before {
+    content: "";
+
+    position: absolute;
+
+    inset: 0;
+
+    pointer-events: none;
+
+    opacity: 0.38;
+
+    background:
+            repeating-linear-gradient(
+                    0deg,
+                    transparent 0,
+                    transparent 5px,
+                    rgba(79, 49, 25, 0.035) 6px
+            );
+}
+
+/* wine backing */
+.ra-card::after {
+    content: "";
+
+    position: absolute;
+
+    inset: 8px;
+
+    border: 1px solid
+    rgba(92, 53, 27, 0.25);
+
+    pointer-events: none;
+}
+
+/* ---------------------------------------------------------------------
+   corners
+   --------------------------------------------------------------------- */
+
+.ra-card-corner {
+    position: absolute;
+
+    width: 28px;
+    height: 28px;
+
+    z-index: 3;
+
+    pointer-events: none;
+}
+
+.ra-card-corner::before,
+.ra-card-corner::after {
+    content: "";
+
+    position: absolute;
+
+    background: #896936;
+}
+
+.ra-card-corner::before {
+    width: 100%;
+    height: 1px;
+}
+
+.ra-card-corner::after {
+    width: 1px;
+    height: 100%;
+}
+
+.ra-card-corner-tl {
+    top: 14px;
+    left: 14px;
+}
+
+.ra-card-corner-tr {
+    top: 14px;
+    right: 14px;
+
+    transform: rotate(90deg);
+}
+
+.ra-card-corner-bl {
+    bottom: 14px;
+    left: 14px;
+
+    transform: rotate(-90deg);
+}
+
+.ra-card-corner-br {
+    bottom: 14px;
+    right: 14px;
+
+    transform: rotate(180deg);
+}
+
+/* ---------------------------------------------------------------------
+   card header
+   --------------------------------------------------------------------- */
+
+.ra-card-top {
+    position: relative;
+
+    z-index: 2;
+
+    display: flex;
+
+    justify-content: space-between;
+
+    padding-bottom: 13px;
+
+    border-bottom: 1px solid
+    rgba(88, 56, 31, 0.22);
+}
+
+.ra-card-archive,
+.ra-card-number {
+    font-family:
+            "DM Mono",
+            monospace;
+
+    font-size: 7px;
+
+    letter-spacing: 0.16em;
+
+    text-transform: uppercase;
+}
+
+.ra-card-archive {
+    color: #8b6941;
+}
+
+.ra-card-number {
+    color: #72563a;
+}
+
+/* ---------------------------------------------------------------------
+   ornament
+   --------------------------------------------------------------------- */
+
+.ra-card-ornament {
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    gap: 8px;
+
+    margin: 17px 0 13px;
+}
+
+.ra-card-ornament span {
+    width: 42px;
+    height: 1px;
+
+    background:
+            linear-gradient(
+                    to right,
+                    transparent,
+                    #a37c45
+            );
+}
+
+.ra-card-ornament span:last-child {
+    background:
+            linear-gradient(
+                    to left,
+                    transparent,
+                    #a37c45
+            );
+}
+
+.ra-card-ornament i {
+    color: #a27a43;
+
+    font-style: normal;
+
+    font-size: 9px;
+}
+
+/* ---------------------------------------------------------------------
+   heading
+   --------------------------------------------------------------------- */
+
+.ra-card-heading {
+    position: relative;
+    z-index: 2;
+
+    display: flex;
+
+    gap: 15px;
+
+    align-items: center;
+}
+
+.ra-card-initial {
+    width: 47px;
+    height: 47px;
+
+    flex: 0 0 auto;
+
+    display: grid;
+    place-items: center;
+
+    border: 1px solid
+    rgba(111, 72, 36, 0.5);
+
+    color: #6f482b;
+
+    font-family:
+            "Cormorant Garamond",
+            serif;
+
+    font-size: 31px;
+
+    font-style: italic;
+
+    background:
+            rgba(255, 247, 226, 0.3);
+}
+
+.ra-card-kicker {
+    display: block;
+
+    margin-bottom: 3px;
+
+    color: #987346;
+
+    font-family:
+            "DM Mono",
+            monospace;
+
+    font-size: 7px;
+
+    letter-spacing: 0.16em;
+
+    text-transform: uppercase;
+}
+
+.ra-card-heading h2 {
+    margin: 0;
+
+    color: #39261d;
+
+    font-family:
+            "Cormorant Garamond",
+            Georgia,
+            serif;
+
+    font-size: 28px;
+
+    font-weight: 500;
+
+    line-height: 1.05;
+
+    letter-spacing: -0.02em;
+}
+
+/* ---------------------------------------------------------------------
+   preview
+   --------------------------------------------------------------------- */
+
+.ra-card-preview {
+    position: relative;
+
+    z-index: 2;
+
+    flex: 1;
+
+    margin: 22px 0;
+
+    color: #4c382b;
+
+    font-family:
+            "Cormorant Garamond",
+            Georgia,
+            serif;
+
+    font-size: 17px;
+
+    line-height: 1.52;
+
+    display: -webkit-box;
+
+    -webkit-line-clamp: 7;
+
+    -webkit-box-orient: vertical;
+
+    overflow: hidden;
+}
+
+/* ---------------------------------------------------------------------
+   photo
+   --------------------------------------------------------------------- */
+
+.ra-card-photo {
+    position: relative;
+
+    z-index: 2;
+
+    margin: 0 0 18px;
+
+    padding: 7px;
+
+    background: #f1e5cf;
+
+    border: 1px solid
+    rgba(76, 48, 28, 0.25);
+
+    transform: rotate(-1.2deg);
+
+    box-shadow:
+            0 6px 10px
+            rgba(0, 0, 0, 0.17);
+}
+
+.ra-card-photo img {
+    width: 100%;
+    height: 120px;
+
+    object-fit: cover;
+
+    display: block;
+
+    filter:
+            sepia(0.15)
+            saturate(0.85);
+}
+
+.ra-photo-caption {
+    display: block;
+
+    padding: 5px 3px 1px;
+
+    color: #7d654a;
+
+    font-family:
+            "Caveat",
+            cursive;
+
+    font-size: 12px;
+
+    text-align: right;
+}
+
+/* ---------------------------------------------------------------------
+   bottom
+   --------------------------------------------------------------------- */
+
+.ra-card-bottom {
+    position: relative;
+
+    z-index: 2;
+
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: flex-end;
+
+    gap: 10px;
+
+    padding-top: 15px;
+
+    border-top: 1px solid
+    rgba(88, 56, 31, 0.22);
+}
+
+.ra-card-meta {
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 3px;
+
+    color: #876b4d;
+
+    font-family:
+            "DM Mono",
+            monospace;
+
+    font-size: 7px;
+
+    text-transform: uppercase;
+
+    letter-spacing: 0.07em;
+}
+
+.ra-open {
+    color: #6b4227;
+
+    font-family:
+            "DM Mono",
+            monospace;
+
+    font-size: 8px;
+
+    text-transform: uppercase;
+
+    letter-spacing: 0.07em;
+
+    white-space: nowrap;
+}
+
+.ra-open b {
+    margin-left: 5px;
+
+    font-size: 12px;
+
+    font-weight: 400;
+}
+
+/* =====================================================================
+   LOADING / EMPTY
+   ===================================================================== */
+
+.archive-status,
+.archive-empty {
+    min-height: 400px;
+
+    display: flex;
+
+    flex-direction: column;
+
+    align-items: center;
+
+    justify-content: center;
+
+    text-align: center;
+}
+
+.loading-seal {
+    width: 60px;
+    height: 60px;
+
+    display: grid;
+    place-items: center;
+
+    margin-bottom: 20px;
+
+    border: 1px solid
+    rgba(181, 139, 80, 0.4);
+
+    border-radius: 50%;
+
+    color: var(--gold);
+
+    animation:
+            archiveSpin 2s
+            linear infinite;
+}
+
+.archive-status span {
+    color: var(--cream);
+
+    font-family:
+            "Cormorant Garamond",
+            serif;
+
+    font-size: 26px;
+}
+
+.archive-status small {
+    margin-top: 5px;
+
+    color: #6e6259;
+
+    font-family:
+            "DM Mono",
+            monospace;
+
+    font-size: 8px;
+
+    letter-spacing: 0.1em;
+}
+
+@keyframes archiveSpin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.empty-symbol {
+    width: 58px;
+    height: 58px;
+
+    display: grid;
+    place-items: center;
+
+    margin-bottom: 20px;
+
+    border: 1px solid
+    rgba(181, 139, 80, 0.3);
+
+    color: var(--gold);
+
+    font-family:
+            "Cormorant Garamond",
+            serif;
+
+    font-size: 27px;
+}
+
+.archive-empty h2 {
+    margin: 0;
+
+    color: var(--cream);
+
+    font-family:
+            "Cormorant Garamond",
+            serif;
+
+    font-size: 34px;
+
+    font-weight: 400;
+}
+
+.archive-empty p {
+    max-width: 430px;
+
+    margin: 12px auto 22px;
+
+    color: #7e7065;
+
+    font-family:
+            "Cormorant Garamond",
+            serif;
+
+    font-size: 17px;
+
+    line-height: 1.5;
+}
+
+.archive-empty button {
+    border: 1px solid
+    rgba(181, 139, 80, 0.35);
+
+    background: var(--wine);
+
+    color: var(--gold-light);
+
+    padding: 11px 20px;
+
+    font-family:
+            "DM Mono",
+            monospace;
+
+    font-size: 9px;
+
+    letter-spacing: 0.08em;
+
+    text-transform: uppercase;
+
+    cursor: pointer;
+}
+
+/* =====================================================================
+   FOOTER
+   ===================================================================== */
+
+.archive-footer {
+    display: flex;
+
+    justify-content: center;
+
+    align-items: center;
+
+    gap: 18px;
+
+    padding: 75px 0 45px;
+
+    color: #63564d;
+
+    text-align: center;
+}
+
+.archive-footer > span {
+    color: var(--gold-dark);
+
+    font-size: 8px;
+}
+
+.archive-footer p {
+    margin: 0;
+
+    font-family:
+            "Caveat",
+            cursive;
+
+    font-size: 16px;
+
+    line-height: 1.25;
+}
+
+/* =====================================================================
+   VIEWER OVERLAY
+   ===================================================================== */
+
+.ra-overlay {
+    position: fixed;
+
+    inset: 0;
+
+    z-index: 1000;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    padding:
+            28px
+            20px;
+
+    background:
+            radial-gradient(
+                    circle at center,
+                    rgba(87, 43, 50, 0.28),
+                    rgba(10, 6, 8, 0.94)
+            );
+
+    backdrop-filter:
+            blur(9px);
+
+    overflow: hidden;
+}
+
+.ra-viewer {
+    width: min(
+            850px,
+            100%
+    );
+
+    max-height:
+            calc(100dvh - 56px);
+
+    display: flex;
+
+    flex-direction: column;
+
+    align-items: center;
+
+    gap: 13px;
+}
+
+/* =====================================================================
+   ROYAL DOCUMENT
+   ===================================================================== */
+
+.ra-document {
+    width: 100%;
+
+    height: min(
+            790px,
+            calc(100dvh - 105px)
+    );
+
+    min-height: 440px;
+
+    perspective: 1000px;
+}
+
+.ra-document-frame {
+    width: 100%;
+    height: 100%;
+
+    position: relative;
+
+    display: flex;
+
+    flex-direction: column;
+
+    background:
+            radial-gradient(
+                    ellipse at 50% 0%,
+                    rgba(255, 255, 255, 0.42),
+                    transparent 35%
+            ),
+            linear-gradient(
+                    135deg,
+                    #f0e1c5,
+                    #e3cfad 45%,
+                    #eadbc0
+            );
+
+    color: var(--ink);
+
+    overflow: hidden;
+
+    border:
+            8px solid
+            #35171f;
+
+    box-shadow:
+            0 40px 100px
+            rgba(0, 0, 0, 0.65),
+            0 5px 0
+            #76512e,
+            inset 0 0 0 1px
+            rgba(255, 255, 255, 0.3);
+
+    isolation: isolate;
+}
+
+/* texture */
+.ra-document-frame::before {
+    content: "";
+
+    position: absolute;
+
+    inset: 0;
+
+    z-index: -1;
+
+    opacity: 0.32;
+
+    background:
+            repeating-linear-gradient(
+                    0deg,
+                    transparent 0,
+                    transparent 7px,
+                    rgba(75, 49, 30, 0.035) 8px
+            ),
+            repeating-linear-gradient(
+                    90deg,
+                    transparent 0,
+                    transparent 13px,
+                    rgba(255, 255, 255, 0.05) 14px
+            );
+}
+
+/* gold inner border */
+.ra-document-frame::after {
+    content: "";
+
+    position: absolute;
+
+    inset: 13px;
+
+    z-index: 20;
+
+    pointer-events: none;
+
+    border: 1px solid
+    rgba(121, 83, 38, 0.5);
+
+    box-shadow:
+            inset 0 0 0 4px
+            rgba(181, 139, 80, 0.08);
+}
+
+/* =====================================================================
+   CLOSE
+   ===================================================================== */
+
+.ra-close {
+    position: absolute;
+
+    top: 18px;
+    right: 20px;
+
+    z-index: 50;
+
+    width: 35px;
+    height: 35px;
+
+    display: grid;
+    place-items: center;
+
+    border: 1px solid
+    rgba(106, 69, 35, 0.35);
+
+    background:
+            rgba(234, 219, 193, 0.8);
+
+    color: #654429;
+
+    cursor: pointer;
+
+    transition: 0.2s ease;
+}
+
+.ra-close span {
+    font-size: 22px;
+
+    line-height: 1;
+
+    font-family:
+            "Cormorant Garamond",
+            serif;
+}
+
+.ra-close:hover {
+    background: #5a2733;
+
+    color: var(--gold-light);
+
+    border-color: #5a2733;
+}
+
+/* =====================================================================
+   DOCUMENT HEADER
+   ===================================================================== */
+
+.ra-document-head {
+    flex: 0 0 auto;
+
+    padding:
+            38px
+            60px
+            0;
+}
+
+.ra-document-class {
+    display: flex;
+
+    justify-content: space-between;
+
+    padding-bottom: 11px;
+
+    border-bottom: 1px solid
+    rgba(91, 59, 31, 0.25);
+
+    color: #80603b;
+
+    font-family:
+            "DM Mono",
+            monospace;
+
+    font-size: 7px;
+
+    letter-spacing: 0.17em;
+}
+
+.ra-document-title-row {
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    gap: 30px;
+
+    padding-top: 25px;
+}
+
+.ra-document-kicker {
+    display: block;
+
+    margin-bottom: 5px;
+
+    color: #9a7342;
+
+    font-family:
+            "DM Mono",
+            monospace;
+
+    font-size: 7px;
+
+    letter-spacing: 0.2em;
+}
+
+.ra-document-title-row h2 {
+    max-width: 610px;
+
+    margin: 0;
+
+    color: #34231c;
+
+    font-family:
+            "Cormorant Garamond",
+            Georgia,
+            serif;
+
+    font-size: clamp(
+            34px,
+            4.3vw,
+            56px
+    );
+
+    line-height: 0.98;
+
+    font-weight: 500;
+
+    letter-spacing: -0.025em;
+}
+
+/* =====================================================================
+   WAX SEAL
+   ===================================================================== */
+
+.ra-seal {
+    width: 66px;
+    height: 66px;
+
+    flex: 0 0 auto;
+
+    display: grid;
+    place-items: center;
+
+    border-radius: 50%;
+
+    background:
+            radial-gradient(
+                    circle at 35% 30%,
+                    #8d3d4a,
+                    #54212c 65%,
+                    #35141c
+            );
+
+    border: 2px solid
+    rgba(76, 30, 38, 0.8);
+
+    box-shadow:
+            0 4px 7px
+            rgba(0, 0, 0, 0.3),
+            inset 0 0 0 3px
+            rgba(206, 151, 93, 0.15);
+}
+
+.ra-seal-inner {
+    width: 38px;
+    height: 38px;
+
+    display: grid;
+    place-items: center;
+
+    border: 1px solid
+    rgba(216, 189, 136, 0.45);
+
+    border-radius: 50%;
+
+    color: #d8bd88;
+
+    font-family:
+            "Cormorant Garamond",
+            serif;
+
+    font-size: 22px;
+
+    font-style: italic;
+}
+
+/* =====================================================================
+   RULE
+   ===================================================================== */
+
+.ra-document-rule {
+    display: flex;
+
+    align-items: center;
+
+    gap: 10px;
+
+    margin: 23px 0 13px;
+}
+
+.ra-document-rule span {
+    flex: 1;
+
+    height: 1px;
+
+    background:
+            linear-gradient(
+                    to right,
+                    transparent,
+                    rgba(112, 74, 35, 0.45)
+            );
+}
+
+.ra-document-rule span:last-child {
+    background:
+            linear-gradient(
+                    to left,
+                    transparent,
+                    rgba(112, 74, 35, 0.45)
+            );
+}
+
+.ra-document-rule i {
+    color: #9c733d;
+
+    font-size: 9px;
+
+    font-style: normal;
+}
+
+.ra-document-details {
+    display: flex;
+
+    justify-content: space-between;
+
+    gap: 15px;
+
+    color: #8c6c46;
+
+    font-family:
+            "DM Mono",
+            monospace;
+
+    font-size: 7px;
+
+    letter-spacing: 0.09em;
+
+    text-transform: uppercase;
+}
+
+/* =====================================================================
+   DOCUMENT SCROLL
+   ===================================================================== */
+
+.ra-document-scroll {
+    flex: 1;
+
+    min-height: 0;
+
+    overflow-y: auto;
+
+    padding:
+            22px
+            72px
+            28px;
+
+    scrollbar-width: thin;
+
+    scrollbar-color:
+            rgba(117, 80, 39, 0.45)
+            transparent;
+}
+
+.ra-document-scroll::-webkit-scrollbar {
+    width: 5px;
+}
+
+.ra-document-scroll::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.ra-document-scroll::-webkit-scrollbar-thumb {
+    background:
+            rgba(117, 80, 39, 0.4);
+}
+
+/* =====================================================================
+   MANUSCRIPT
+   ===================================================================== */
+
+.ra-document-content {
+    position: relative;
+
+    max-width: 680px;
+
+    margin: 0 auto;
+
+    color: #3f2d23;
+}
+
+.ra-document-content > p {
+    margin: 0;
+
+    font-family:
+            "Cormorant Garamond",
+            Georgia,
+            serif;
+
+    font-size: 23px;
+
+    line-height: 1.63;
+
+    white-space: pre-wrap;
+
+    letter-spacing: 0.005em;
+}
+
+/* giant manuscript first letter */
+.ra-manuscript-mark {
+    float: left;
+
+    width: 57px;
+    height: 65px;
+
+    margin:
+            7px
+            12px
+            0
+            0;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    color: #7a3d43;
+
+    font-family:
+            "Cormorant Garamond",
+            Georgia,
+            serif;
+
+    font-size: 61px;
+
+    font-style: italic;
+
+    line-height: 0.8;
+
+    border-right: 1px solid
+    rgba(119, 76, 37, 0.35);
+}
+
+/* =====================================================================
+   MOUNTED PHOTO
+   ===================================================================== */
+
+.ra-mounted-photo {
+    width: min(
+            520px,
+            92%
+    );
+
+    margin:
+            36px
+            auto
+            12px;
+
+    padding: 10px 10px 17px;
+
+    background: #f4e9d5;
+
+    border:
+            1px solid
+            rgba(81, 51, 28, 0.28);
+
+    box-shadow:
+            0 12px 25px
+            rgba(50, 29, 17, 0.2);
+
+    transform: rotate(-0.6deg);
+}
+
+.ra-photo-frame {
+    border: 1px solid
+    rgba(91, 58, 29, 0.25);
+
+    padding: 3px;
+
+    background: #e0ceb0;
+}
+
+.ra-photo-frame img {
+    width: 100%;
+
+    max-height: 340px;
+
+    display: block;
+
+    object-fit: contain;
+
+    filter:
+            sepia(0.12)
+            saturate(0.88);
+}
+
+.ra-mounted-photo figcaption {
+    display: flex;
+
+    justify-content: space-between;
+
+    gap: 10px;
+
+    padding: 9px 3px 0;
+
+    color: #836a4b;
+
+    font-family:
+            "DM Mono",
+            monospace;
+
+    font-size: 7px;
+
+    letter-spacing: 0.08em;
+
+    text-transform: uppercase;
+}
+
+.ra-mounted-photo figcaption span:last-child {
+    font-family:
+            "Caveat",
+            cursive;
+
+    font-size: 13px;
+
+    text-transform: none;
+
+    letter-spacing: 0;
+}
+
+/* =====================================================================
+   DOCUMENT FOOTER
+   ===================================================================== */
+
+.ra-document-footer {
+    flex: 0 0 auto;
+
+    display: grid;
+
+    grid-template-columns:
+    1fr
+    auto
+    1fr;
+
+    align-items: center;
+
+    gap: 20px;
+
+    padding:
+            17px
+            60px
+            24px;
+
+    border-top: 1px solid
+    rgba(91, 59, 31, 0.25);
+}
+
+.ra-footer-left {
+    display: flex;
+
+    align-items: center;
+
+    gap: 8px;
+
+    color: #83643e;
+
+    font-family:
+            "Caveat",
+            cursive;
+
+    font-size: 13px;
+
+    line-height: 1;
+}
+
+.ra-footer-left svg {
+    width: 31px;
+    height: 24px;
+}
+
+.ra-footer-date {
+    text-align: center;
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 3px;
+}
+
+.ra-footer-date small {
+    color: #9b7544;
+
+    font-family:
+            "DM Mono",
+            monospace;
+
+    font-size: 6px;
+
+    letter-spacing: 0.16em;
+}
+
+.ra-footer-date strong {
+    color: #59402a;
+
+    font-family:
+            "Cormorant Garamond",
+            serif;
+
+    font-size: 15px;
+
+    font-weight: 500;
+}
+
+.ra-footer-mark {
+    justify-self: end;
+
+    width: 33px;
+    height: 33px;
+
+    display: grid;
+    place-items: center;
+
+    border: 1px solid
+    rgba(115, 75, 35, 0.35);
+
+    color: #7d5b35;
+
+    font-family:
+            "Cormorant Garamond",
+            serif;
+
+    font-style: italic;
+
+    font-size: 18px;
+}
+
+/* =====================================================================
+   DOCUMENT CORNERS
+   ===================================================================== */
+
+.ra-document-corner {
+    position: absolute;
+
+    z-index: 25;
+
+    width: 42px;
+    height: 42px;
+
+    pointer-events: none;
+}
+
+.ra-document-corner::before,
+.ra-document-corner::after {
+    content: "";
+
+    position: absolute;
+
+    background: #947040;
+}
+
+.ra-document-corner::before {
+    width: 100%;
+    height: 1px;
+}
+
+.ra-document-corner::after {
+    width: 1px;
+    height: 100%;
+}
+
+.ra-doc-tl {
+    top: 19px;
+    left: 19px;
+}
+
+.ra-doc-tr {
+    top: 19px;
+    right: 19px;
+
+    transform: rotate(90deg);
+}
+
+.ra-doc-bl {
+    bottom: 19px;
+    left: 19px;
+
+    transform: rotate(-90deg);
+}
+
+.ra-doc-br {
+    bottom: 19px;
+    right: 19px;
+
+    transform: rotate(180deg);
+}
+
+/* =====================================================================
+   SIDE LABEL
+   ===================================================================== */
+
+.ra-side-label {
+    position: absolute;
+
+    right: 4px;
+    top: 50%;
+
+    transform:
+            translateY(-50%)
+            rotate(90deg);
+
+    transform-origin: right center;
+
+    color: rgba(113, 76, 38, 0.42);
+
+    font-family:
+            "DM Mono",
+            monospace;
+
+    font-size: 6px;
+
+    letter-spacing: 0.25em;
+
+    white-space: nowrap;
+
+    pointer-events: none;
+}
+
+/* =====================================================================
+   VIEWER NAVIGATION
+   ===================================================================== */
+
+.ra-viewer-nav {
+    width: min(
+            520px,
+            100%
+    );
+
+    height: 48px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    padding: 0 7px;
+
+    background:
+            rgba(36, 17, 23, 0.95);
+
+    border:
+            1px solid
+            rgba(181, 139, 80, 0.2);
+
+    box-shadow:
+            0 10px 30px
+            rgba(0, 0, 0, 0.35);
+}
+
+.ra-nav-button {
+    height: 34px;
+
+    min-width: 90px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    gap: 8px;
+
+    border: 0;
+
+    background: transparent;
+
+    color: #bba27e;
+
+    cursor: pointer;
+
+    font-family:
+            "DM Mono",
+            monospace;
+
+    font-size: 8px;
+
+    text-transform: uppercase;
+
+    letter-spacing: 0.08em;
+}
+
+.ra-nav-button span {
+    font-size: 17px;
+}
+
+.ra-nav-button small {
+    font-size: 7px;
+}
+
+.ra-nav-button:hover:not(:disabled) {
+    color: var(--gold-light);
+}
+
+.ra-nav-button:disabled {
+    opacity: 0.22;
+
+    cursor: not-allowed;
+}
+
+.ra-viewer-counter {
+    display: flex;
+
+    align-items: baseline;
+
+    gap: 7px;
+
+    color: var(--gold-light);
+
+    font-family:
+            "Cormorant Garamond",
+            serif;
+
+    font-size: 19px;
+}
+
+.ra-viewer-counter i {
+    color: #6f5d50;
+
+    font-size: 12px;
+
+    font-style: italic;
+}
+
+/* =====================================================================
+   ACCESSIBILITY
+   ===================================================================== */
+
+.sr-only {
+    position: absolute;
+
+    width: 1px;
+    height: 1px;
+
+    padding: 0;
+    margin: -1px;
+
+    overflow: hidden;
+
+    clip: rect(
+            0,
+            0,
+            0,
+            0
+    );
+
+    white-space: nowrap;
+
+    border: 0;
+}
+
+/* =====================================================================
+   RESPONSIVE
+   ===================================================================== */
+
+@media (max-width: 1050px) {
+    .archive-grid {
+        grid-template-columns:
+      repeat(
+        2,
+        minmax(0, 1fr)
+      );
+    }
+
+    .ra-document-head {
+        padding-left: 48px;
+        padding-right: 48px;
+    }
+
+    .ra-document-scroll {
+        padding-left: 55px;
+        padding-right: 55px;
+    }
+
+    .ra-document-footer {
+        padding-left: 48px;
+        padding-right: 48px;
+    }
+}
+
+@media (max-width: 760px) {
+    .archive-wrap {
+        width: min(
+                100% - 30px,
+                600px
+        );
+    }
+
+    .archive-top {
+        grid-template-columns: 1fr auto;
+    }
+
+    .archive-brand {
+        display: none;
+    }
+
+    .archive-count {
+        justify-self: end;
+    }
+
+    .archive-hero {
+        margin-top: 65px;
+    }
+
+    .archive-hero h1 {
+        font-size: 65px;
+    }
+
+    .archive-toolbar {
+        grid-template-columns: 1fr;
+    }
+
+    .archive-control-button,
+    .archive-surprise {
+        min-height: 44px;
+    }
+
+    .archive-grid {
+        grid-template-columns: 1fr;
+
+        gap: 24px;
+    }
+
+    .ra-card {
+        min-height: 430px;
+    }
+
+    .ra-document {
+        height:
+                calc(100dvh - 85px);
+
+        min-height: 400px;
+    }
+
+    .ra-document-frame {
+        border-width: 5px;
+    }
+
+    .ra-document-head {
+        padding:
+                30px
+                35px
+                0;
+    }
+
+    .ra-document-title-row h2 {
+        font-size: 39px;
+    }
+
+    .ra-document-scroll {
+        padding:
+                20px
+                38px
+                25px;
+    }
+
+    .ra-document-content > p {
+        font-size: 20px;
+
+        line-height: 1.55;
+    }
+
+    .ra-document-footer {
+        padding:
+                14px
+                35px
+                20px;
+    }
+
+    .ra-side-label {
+        display: none;
+    }
+
+    .ra-document-corner {
+        width: 30px;
+        height: 30px;
+    }
+
+    .ra-doc-tl {
+        top: 14px;
+        left: 14px;
+    }
+
+    .ra-doc-tr {
+        top: 14px;
+        right: 14px;
+    }
+
+    .ra-doc-bl {
+        bottom: 14px;
+        left: 14px;
+    }
+
+    .ra-doc-br {
+        bottom: 14px;
+        right: 14px;
+    }
+}
+
+@media (max-width: 520px) {
+    .archive-wrap {
+        width: min(
+                100% - 20px,
+                500px
+        );
+    }
+
+    .archive-top {
+        min-height: 70px;
+    }
+
+    .archive-count {
+        gap: 7px;
+
+        font-size: 7px;
+    }
+
+    .archive-count span:first-child {
+        display: none;
+    }
+
+    .archive-hero {
+        margin:
+                55px
+                auto
+                45px;
+    }
+
+    .archive-hero h1 {
+        font-size: 55px;
+    }
+
+    .archive-hero p {
+        font-size: 17px;
+    }
+
+    .archive-filters {
+        flex-direction: column;
+
+        align-items: flex-start;
+    }
+
+    .ra-card {
+        min-height: 420px;
+
+        padding:
+                24px
+                23px
+                20px;
+    }
+
+    .ra-card-heading h2 {
+        font-size: 25px;
+    }
+
+    .ra-document-head {
+        padding:
+                27px
+                27px
+                0;
+    }
+
+    .ra-document-class {
+        padding-right: 35px;
+
+        font-size: 6px;
+    }
+
+    .ra-document-title-row {
+        gap: 12px;
+    }
+
+    .ra-document-title-row h2 {
+        font-size: 31px;
+    }
+
+    .ra-seal {
+        width: 48px;
+        height: 48px;
+    }
+
+    .ra-seal-inner {
+        width: 29px;
+        height: 29px;
+
+        font-size: 17px;
+    }
+
+    .ra-document-details {
+        font-size: 6px;
+
+        flex-wrap: wrap;
+    }
+
+    .ra-document-scroll {
+        padding:
+                18px
+                25px
+                22px;
+    }
+
+    .ra-document-content > p {
+        font-size: 18px;
+
+        line-height: 1.52;
+    }
+
+    .ra-manuscript-mark {
+        width: 44px;
+        height: 54px;
+
+        font-size: 51px;
+    }
+
+    .ra-mounted-photo {
+        width: 100%;
+
+        margin:
+                28px
+                auto
+                10px;
+    }
+
+    .ra-mounted-photo figcaption {
+        flex-direction: column;
+
+        gap: 2px;
+    }
+
+    .ra-document-footer {
+        grid-template-columns:
+      1fr
+      auto;
+
+        padding:
+                12px
+                27px
+                18px;
+    }
+
+    .ra-footer-left {
+        font-size: 11px;
+    }
+
+    .ra-footer-date {
+        display: none;
+    }
+
+    .ra-footer-mark {
+        justify-self: end;
+    }
+
+    .ra-viewer-nav {
+        height: 44px;
+    }
+
+    .ra-nav-button {
+        min-width: 70px;
+    }
+
+    .ra-nav-button small {
+        display: none;
+    }
+}
+
+@media (max-height: 700px) and (min-width: 761px) {
+    .ra-document {
+        height:
+                calc(100dvh - 85px);
+    }
+
+    .ra-document-head {
+        padding-top: 24px;
+    }
+
+    .ra-document-title-row {
+        padding-top: 15px;
+    }
+
+    .ra-document-rule {
+        margin-top: 15px;
+    }
+
+    .ra-document-scroll {
+        padding-top: 15px;
+    }
+
+    .ra-document-footer {
+        padding-top: 10px;
+        padding-bottom: 14px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+
+        animation-iteration-count: 1 !important;
+
+        transition-duration: 0.01ms !important;
+    }
+}
